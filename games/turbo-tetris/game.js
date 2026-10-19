@@ -12,7 +12,7 @@ const BOARD_Y = 46;
 const CANVAS_WIDTH = 280;
 const CANVAS_HEIGHT = 550;
 const FALL_INTERVAL = 850;
-
+const MIN_FALL_INTERVAL = 100;
 const SHAPES = [
   { name: "I", cells: [[0, 0], [1, 0], [2, 0], [3, 0]] },
   { name: "O", cells: [[0, 0], [1, 0], [0, 1], [1, 1]] },
@@ -23,8 +23,17 @@ const SHAPES = [
   { name: "L", cells: [[2, 0], [0, 1], [1, 1], [2, 1]] },
 ];
 
-function randomShape() {
-  return SHAPES[Math.floor(Math.random() * SHAPES.length)];
+function shuffledShapes() {
+  const bag = [...SHAPES];
+  for (let index = bag.length - 1; index > 0; index--) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [bag[index], bag[swapIndex]] = [bag[swapIndex], bag[index]];
+  }
+  return bag;
+}
+
+function cellKey(column, row) {
+  return `${column},${row}`;
 }
 
 function rotateCells(cells) {
@@ -40,6 +49,10 @@ function shapeHeight(cells) {
   return Math.max(...cells.map(([, y]) => y)) + 1;
 }
 
+function emptyRow() {
+  return Array(BOARD_COLUMNS).fill(null);
+}
+
 export async function mount(container) {
   await loadCss(new URL("./game.css", import.meta.url));
 
@@ -51,10 +64,15 @@ export async function mount(container) {
         <canvas class="tt-board" width="${CANVAS_WIDTH}" height="${CANVAS_HEIGHT}"
           role="img" tabindex="0" aria-label="Turbo Tetris playfield"></canvas>
       </div>
-      <aside class="tt-next" aria-label="Next tetromino">
+      <aside class="tt-next" aria-label="Game information">
         <h4>Next</h4>
         <div class="tt-preview" data-preview aria-hidden="true"></div>
         <p data-next-name></p>
+        <dl class="tt-stats">
+          <div><dt>Score</dt><dd data-score>0</dd></div>
+          <div><dt>Lines</dt><dd data-lines>0</dd></div>
+          <div><dt>Level</dt><dd data-level>1</dd></div>
+        </dl>
       </aside>
     </div>
     <div class="tt-controls" aria-label="Game controls">
@@ -62,10 +80,11 @@ export async function mount(container) {
       <button class="button" type="button" data-left aria-label="Move left">←</button>
       <button class="button" type="button" data-rotate aria-label="Rotate clockwise">↑</button>
       <button class="button" type="button" data-right aria-label="Move right">→</button>
-      <button class="button" type="button" data-drop>Drop!</button>
+      <button class="button" type="button" data-down aria-label="Soft drop">↓</button>
+      <button class="button" type="button" data-drop>Hard drop</button>
       <button class="button tt-new" type="button" data-new>New game</button>
     </div>
-    <p class="tt-instructions">Use ← and → to move, ↑ to rotate, ↓ to move down one row, or Space to drop.</p>`;
+    <p class="tt-instructions">Use ← and → to move, ↑ to rotate, ↓ to soft drop, or Space to hard drop. Rows inside the box clear at 10 blocks; rows below it span the full screen.</p>`;
   container.append(root);
 
   const board = root.querySelector(".tt-board");
@@ -75,10 +94,14 @@ export async function mount(container) {
   const status = root.querySelector("[data-status]");
   const preview = root.querySelector("[data-preview]");
   const nextName = root.querySelector("[data-next-name]");
+  const scoreOutput = root.querySelector("[data-score]");
+  const linesOutput = root.querySelector("[data-lines]");
+  const levelOutput = root.querySelector("[data-level]");
   const moveButtons = [
     root.querySelector("[data-left]"),
     root.querySelector("[data-rotate]"),
     root.querySelector("[data-right]"),
+    root.querySelector("[data-down]"),
     root.querySelector("[data-drop]"),
   ];
 
@@ -89,27 +112,81 @@ export async function mount(container) {
   const overlayContext = overlay.getContext("2d");
   if (!overlayContext) throw new Error("Turbo Tetris could not create its page overlay");
 
-  let piece = randomShape();
-  let pieceCells = piece.cells;
-  let next = randomShape();
+  let grid = [];
+  let outsideCells = new Map();
+  let bag = [];
+  let piece = null;
+  let next = null;
   let pieceColumn = 0;
   let pieceRow = 0;
   let boardLeft = 0;
-  let boardTop = 0;
   let pageTop = 0;
   let scale = 1;
-  let maxRow = 0;
   let timer = null;
-  let landed = false;
+  let gameOver = false;
+  let score = 0;
+  let lines = 0;
+  let level = 1;
 
-  function drawBlock(x, y, color) {
-    context.fillStyle = color;
-    context.beginPath();
-    context.roundRect(x, y, CELL, CELL, 7);
-    context.fill();
-    context.strokeStyle = "rgb(255 255 255 / 55%)";
-    context.lineWidth = 2;
-    context.stroke();
+  function takeShape() {
+    if (bag.length === 0) bag = shuffledShapes();
+    const shape = bag.pop();
+    return { ...shape, cells: shape.cells.map(([x, y]) => [x, y]) };
+  }
+
+  function pageRows() {
+    const pageHeight = Math.max(
+      document.documentElement.scrollHeight,
+      document.body.scrollHeight,
+    );
+    const lastRow = Math.floor(
+      (pageHeight - pageTop - CELL * scale) / (STEP * scale),
+    );
+    return Math.max(BOARD_ROWS, lastRow + 1);
+  }
+
+  function outsideColumnBounds() {
+    const originX = boardLeft + BOARD_X * scale - window.scrollX;
+    const step = STEP * scale;
+    const cell = CELL * scale;
+    return {
+      min: Math.ceil(-originX / step),
+      max: Math.floor((window.innerWidth - cell - originX) / step),
+    };
+  }
+
+  function measureBoard() {
+    const rect = board.getBoundingClientRect();
+    scale = rect.width / CANVAS_WIDTH;
+    boardLeft = rect.left + window.scrollX;
+    pageTop = rect.top + window.scrollY + BOARD_Y * scale;
+  }
+
+  function fitGridToPage() {
+    const rows = pageRows();
+    for (const key of outsideCells.keys()) {
+      const [, row] = key.split(",").map(Number);
+      if (row >= rows) outsideCells.delete(key);
+    }
+    if (piece && pieceRow + shapeHeight(piece.cells) > rows) {
+      pieceRow = Math.max(0, rows - shapeHeight(piece.cells));
+    }
+  }
+
+  function accentColor() {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue("--accent")
+      .trim() || "#2f6fed";
+  }
+
+  function drawBlock(target, x, y, size, color) {
+    target.fillStyle = color;
+    target.beginPath();
+    target.roundRect(x, y, size, size, Math.max(2, 7 * scale));
+    target.fill();
+    target.strokeStyle = "rgb(255 255 255 / 55%)";
+    target.lineWidth = Math.max(1, 2 * scale);
+    target.stroke();
   }
 
   function drawBoard() {
@@ -117,6 +194,7 @@ export async function mount(container) {
     const surface = style.getPropertyValue("--surface").trim() || "#fff";
     const line = style.getPropertyValue("--line").trim() || "#d5dde5";
     const bg = style.getPropertyValue("--bg").trim() || "#f2f5f8";
+    const accent = accentColor();
 
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     context.fillStyle = surface;
@@ -135,11 +213,9 @@ export async function mount(container) {
 
     for (let row = 0; row < BOARD_ROWS; row++) {
       for (let column = 0; column < BOARD_COLUMNS; column++) {
-        drawBlock(
-          BOARD_X + column * STEP,
-          BOARD_Y + row * STEP,
-          bg,
-        );
+        const x = BOARD_X + column * STEP;
+        const y = BOARD_Y + row * STEP;
+        drawBlock(context, x, y, CELL, grid[row]?.[column] ? accent : bg);
       }
     }
   }
@@ -157,143 +233,269 @@ export async function mount(container) {
     nextName.textContent = `${next.name} tetromino`;
   }
 
+  function drawOverlayBlock(column, row, color) {
+    const cell = CELL * scale;
+    const step = STEP * scale;
+    const x = boardLeft + (BOARD_X + column * STEP) * scale - window.scrollX;
+    const y = pageTop + row * step - window.scrollY;
+    drawBlock(overlayContext, x, y, cell, color);
+  }
+
+  function drawPieces() {
+    const ratio = window.devicePixelRatio || 1;
+    overlayContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    overlayContext.setTransform(ratio, 0, 0, ratio, 0, 0);
+    const accent = accentColor();
+
+    for (const key of outsideCells.keys()) {
+      const [column, row] = key.split(",").map(Number);
+      drawOverlayBlock(column, row, accent);
+    }
+
+    if (piece && !gameOver) {
+      for (const [column, row] of piece.cells) {
+        drawOverlayBlock(pieceColumn + column, pieceRow + row, accent);
+      }
+    }
+
+    board.setAttribute(
+      "aria-label",
+      `Turbo Tetris playfield. Score ${score}, ${lines} lines, level ${level}. ${
+        gameOver
+          ? "Game over."
+          : piece
+            ? `${piece.name} tetromino at column ${pieceColumn + 1}, page row ${pieceRow + 1}.`
+            : "Ready."
+      }`,
+    );
+  }
+
+  function draw() {
+    drawBoard();
+    drawPieces();
+    scoreOutput.textContent = score.toLocaleString();
+    linesOutput.textContent = lines.toString();
+    levelOutput.textContent = level.toString();
+  }
+
+  function collides(cells, column, row) {
+    return cells.some(([x, y]) => {
+      const targetColumn = column + x;
+      const targetRow = row + y;
+      if (targetRow < 0 || targetRow >= pageRows()) return true;
+      if (targetRow < BOARD_ROWS) {
+        return (
+          targetColumn < 0 ||
+          targetColumn >= BOARD_COLUMNS ||
+          grid[targetRow][targetColumn] !== null
+        );
+      }
+      const { min, max } = outsideColumnBounds();
+      return (
+        targetColumn < min ||
+        targetColumn > max ||
+        outsideCells.has(cellKey(targetColumn, targetRow))
+      );
+    });
+  }
+
+  function setGameOver() {
+    gameOver = true;
+    piece = null;
+    clearInterval(timer);
+    timer = null;
+    moveButtons.forEach((button) => (button.disabled = true));
+    status.textContent = `Game over. Final score: ${score.toLocaleString()}.`;
+    draw();
+  }
+
+  function spawnPiece() {
+    piece = next;
+    next = takeShape();
+    pieceColumn = Math.floor((BOARD_COLUMNS - shapeWidth(piece.cells)) / 2);
+    pieceRow = 0;
+    drawNext();
+
+    if (collides(piece.cells, pieceColumn, pieceRow)) {
+      setGameOver();
+      return false;
+    }
+    return true;
+  }
+
+  function updateSpeed() {
+    clearInterval(timer);
+    if (!gameOver) {
+      const interval = Math.max(
+        MIN_FALL_INTERVAL,
+        FALL_INTERVAL * 0.85 ** (level - 1),
+      );
+      timer = setInterval(tick, interval);
+    }
+  }
+
+  function clearCompletedRows() {
+    const clearedInsideRows = [];
+    grid.forEach((row, index) => {
+      if (row.every((cell) => cell !== null)) clearedInsideRows.push(index);
+    });
+    const { min, max } = outsideColumnBounds();
+    const outsideRows = new Set(
+      [...outsideCells.keys()].map((key) => Number(key.slice(key.indexOf(",") + 1))),
+    );
+    const clearedOutsideRows = [...outsideRows].filter((row) => {
+      if (row < BOARD_ROWS || row >= pageRows()) return false;
+      for (let column = min; column <= max; column++) {
+        if (!outsideCells.has(cellKey(column, row))) return false;
+      }
+      return true;
+    });
+    const cleared = clearedInsideRows.length + clearedOutsideRows.length;
+    if (cleared === 0) return;
+
+    const clearedOutsideSet = new Set(clearedOutsideRows);
+    const shiftedOutsideCells = new Map();
+    for (const [key, color] of outsideCells) {
+      const [column, row] = key.split(",").map(Number);
+      if (clearedOutsideSet.has(row)) continue;
+      const shiftedRow =
+        row + clearedOutsideRows.filter((clearedRow) => clearedRow > row).length;
+      shiftedOutsideCells.set(cellKey(column, shiftedRow), color);
+    }
+    outsideCells = shiftedOutsideCells;
+
+    const remainingInside = grid.filter((_, row) => !clearedInsideRows.includes(row));
+    while (remainingInside.length < BOARD_ROWS) {
+      remainingInside.unshift(emptyRow());
+    }
+    grid = remainingInside;
+    lines += cleared;
+    score += ([0, 100, 300, 500, 800][cleared] || cleared * 200) * level;
+    const newLevel = Math.floor(lines / 10) + 1;
+    if (newLevel > level) {
+      level = newLevel;
+      status.textContent = `Level ${level}!`;
+      updateSpeed();
+    }
+  }
+
+  function lockPiece() {
+    for (const [x, y] of piece.cells) {
+      const row = pieceRow + y;
+      const column = pieceColumn + x;
+      if (row < 0) {
+        setGameOver();
+        return;
+      }
+      if (row >= BOARD_ROWS) {
+        outsideCells.set(cellKey(column, row), piece.name);
+      } else {
+        grid[row][column] = piece.name;
+      }
+    }
+
+    clearCompletedRows();
+    draw();
+    if (!spawnPiece()) return;
+    draw();
+  }
+
+  function tick() {
+    if (!piece || gameOver) return;
+    if (!collides(piece.cells, pieceColumn, pieceRow + 1)) {
+      pieceRow++;
+      drawPieces();
+    } else {
+      lockPiece();
+    }
+  }
+
+  function move(amount) {
+    if (!piece || gameOver) return;
+    const column = pieceColumn + amount;
+    if (!collides(piece.cells, column, pieceRow)) {
+      pieceColumn = column;
+      drawPieces();
+    }
+  }
+
+  function rotate() {
+    if (!piece || gameOver || piece.name === "O") return;
+    const rotated = rotateCells(piece.cells);
+    for (const [columnKick, rowKick] of [
+      [0, 0],
+      [-1, 0],
+      [1, 0],
+      [-2, 0],
+      [2, 0],
+      [0, -1],
+      [-1, -1],
+      [1, -1],
+    ]) {
+      const column = pieceColumn + columnKick;
+      const row = pieceRow + rowKick;
+      if (!collides(rotated, column, row)) {
+        piece.cells = rotated;
+        pieceColumn = column;
+        pieceRow = row;
+        drawPieces();
+        return;
+      }
+    }
+  }
+
+  function softDrop() {
+    if (!piece || gameOver) return;
+    if (collides(piece.cells, pieceColumn, pieceRow + 1)) {
+      lockPiece();
+      return;
+    }
+    pieceRow++;
+    score++;
+    draw();
+  }
+
+  function hardDrop() {
+    if (!piece || gameOver) return;
+    let distance = 0;
+    while (!collides(piece.cells, pieceColumn, pieceRow + 1)) {
+      pieceRow++;
+      distance++;
+    }
+    score += distance * 2;
+    lockPiece();
+  }
+
+  function startGame() {
+    clearInterval(timer);
+    measureBoard();
+    grid = Array.from(
+      { length: BOARD_ROWS },
+      emptyRow,
+    );
+    outsideCells = new Map();
+    bag = [];
+    score = 0;
+    lines = 0;
+    level = 1;
+    gameOver = false;
+    moveButtons.forEach((button) => (button.disabled = false));
+    status.textContent = "";
+    next = takeShape();
+    spawnPiece();
+    draw();
+    updateSpeed();
+  }
+
   function resizeOverlay() {
     const ratio = window.devicePixelRatio || 1;
     overlay.width = Math.round(window.innerWidth * ratio);
     overlay.height = Math.round(window.innerHeight * ratio);
     overlay.style.width = `${window.innerWidth}px`;
     overlay.style.height = `${window.innerHeight}px`;
-    overlayContext.setTransform(ratio, 0, 0, ratio, 0, 0);
-    drawPiece();
-  }
-
-  function drawPiece() {
-    if (!overlayContext) return;
-    overlayContext.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    const style = getComputedStyle(document.documentElement);
-    const accent = style.getPropertyValue("--accent").trim() || "#2f6fed";
-    const cell = CELL * scale;
-    const step = STEP * scale;
-    const x = boardLeft + (BOARD_X + pieceColumn * STEP) * scale - window.scrollX;
-    const y = pageTop + pieceRow * step - window.scrollY;
-
-    for (const [column, row] of pieceCells) {
-      const blockX = x + column * step;
-      const blockY = y + row * step;
-      overlayContext.fillStyle = accent;
-      overlayContext.beginPath();
-      overlayContext.roundRect(blockX, blockY, cell, cell, Math.max(2, 7 * scale));
-      overlayContext.fill();
-      overlayContext.strokeStyle = "rgb(255 255 255 / 55%)";
-      overlayContext.lineWidth = Math.max(1, 2 * scale);
-      overlayContext.stroke();
-    }
-
-    board.setAttribute(
-      "aria-label",
-      `Turbo Tetris playfield. ${piece.name} tetromino, ${
-        shapeWidth(pieceCells)
-      } columns by ${shapeHeight(pieceCells)} rows, ${
-        landed
-          ? "reached the bottom; game over"
-          : `at column ${pieceColumn + 1}, page row ${pieceRow + 1}`
-      }.`,
-    );
-  }
-
-  function measurePage() {
-    const rect = board.getBoundingClientRect();
-    scale = rect.width / CANVAS_WIDTH;
-    boardLeft = rect.left + window.scrollX;
-    pageTop = rect.top + window.scrollY + BOARD_Y * scale;
-    const pageHeight = Math.max(
-      document.documentElement.scrollHeight,
-      document.body.scrollHeight,
-    );
-    const pieceHeight = (shapeHeight(pieceCells) - 1) * STEP * scale + CELL * scale;
-    maxRow = Math.max(
-      0,
-      Math.floor((pageHeight - pageTop - pieceHeight) / (STEP * scale)),
-    );
-  }
-
-  function clampPieceColumn(column) {
-    if (pieceRow < BOARD_ROWS) {
-      return Math.max(
-        0,
-        Math.min(BOARD_COLUMNS - shapeWidth(pieceCells), column),
-      );
-    }
-
-    const originX = boardLeft + BOARD_X * scale;
-    const step = STEP * scale;
-    const pieceWidth = (shapeWidth(pieceCells) - 1) * step + CELL * scale;
-    const pageWidth = Math.max(
-      document.documentElement.clientWidth,
-      document.documentElement.scrollWidth,
-      document.body.scrollWidth,
-    );
-    const minColumn = Math.ceil(-originX / step);
-    const maxColumn = Math.floor((pageWidth - pieceWidth - originX) / step);
-    return Math.max(minColumn, Math.min(maxColumn, column));
-  }
-
-  function finish() {
-    if (landed) return;
-    landed = true;
-    clearInterval(timer);
-    timer = null;
-    moveButtons.forEach((button) => (button.disabled = true));
-    status.textContent = "Game over.";
-    drawPiece();
-  }
-
-  function tick() {
-    if (landed) return;
-    pieceRow = Math.min(maxRow, pieceRow + 1);
-    drawPiece();
-    if (pieceRow >= maxRow) finish();
-  }
-
-  function startGame() {
-    clearInterval(timer);
-    piece = randomShape();
-    pieceCells = piece.cells;
-    pieceColumn = Math.floor((BOARD_COLUMNS - shapeWidth(pieceCells)) / 2);
-    pieceRow = 0;
-    landed = false;
-    status.textContent = "";
-    moveButtons.forEach((button) => (button.disabled = false));
-    next = randomShape();
-    drawNext();
-    measurePage();
-    drawBoard();
-    drawPiece();
-    timer = setInterval(tick, FALL_INTERVAL);
-  }
-
-  function move(amount) {
-    if (landed) return;
-    pieceColumn = clampPieceColumn(pieceColumn + amount);
-    drawPiece();
-  }
-
-  function rotate() {
-    if (landed) return;
-    pieceCells = rotateCells(pieceCells);
-    pieceColumn = clampPieceColumn(pieceColumn);
-    measurePage();
-    pieceRow = Math.min(pieceRow, maxRow);
-    pieceColumn = clampPieceColumn(pieceColumn);
-    drawPiece();
-    if (pieceRow >= maxRow) finish();
-  }
-
-  function drop() {
-    if (landed) return;
-    pieceRow = maxRow;
-    drawPiece();
-    finish();
+    measureBoard();
+    fitGridToPage();
+    draw();
   }
 
   const onKeyDown = (event) => {
@@ -302,31 +504,25 @@ export async function mount(container) {
     if (
       target instanceof HTMLElement &&
       target.closest("input, textarea, select, [contenteditable]")
-    )
-      return;
+    ) return;
     if (event.key === "ArrowLeft") move(-1);
     else if (event.key === "ArrowRight") move(1);
     else if (event.key === "ArrowUp") rotate();
-    else if (event.key === "ArrowDown") tick();
-    else if (event.key === " " && !(target instanceof HTMLButtonElement)) drop();
+    else if (event.key === "ArrowDown") softDrop();
+    else if (event.key === " " && !(target instanceof HTMLButtonElement)) hardDrop();
     else return;
     event.preventDefault();
-  };
-  const onScroll = () => drawPiece();
-  const onResize = () => {
-    measurePage();
-    pieceColumn = clampPieceColumn(pieceColumn);
-    resizeOverlay();
   };
 
   root.querySelector("[data-left]").addEventListener("click", () => move(-1));
   root.querySelector("[data-rotate]").addEventListener("click", rotate);
   root.querySelector("[data-right]").addEventListener("click", () => move(1));
-  root.querySelector("[data-drop]").addEventListener("click", drop);
+  root.querySelector("[data-down]").addEventListener("click", softDrop);
+  root.querySelector("[data-drop]").addEventListener("click", hardDrop);
   root.querySelector("[data-new]").addEventListener("click", startGame);
   document.addEventListener("keydown", onKeyDown);
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onResize);
+  window.addEventListener("scroll", drawPieces, { passive: true });
+  window.addEventListener("resize", resizeOverlay);
 
   resizeOverlay();
   startGame();
@@ -335,8 +531,8 @@ export async function mount(container) {
     destroy() {
       clearInterval(timer);
       document.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("scroll", drawPieces);
+      window.removeEventListener("resize", resizeOverlay);
       overlay.remove();
       root.remove();
     },

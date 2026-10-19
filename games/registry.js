@@ -19,7 +19,7 @@ export const games = [
     id: "turbo-tetris",
     title: "Turbo Tetris",
     blurb:
-      "Rotate falling blocks, line them up, and keep the game going for a high score.",
+      "Rotate falling blocks, clear lines, and survive the drop all the way to the bottom of the page.",
     load: () => import("./turbo-tetris/game.js"),
   },
   {

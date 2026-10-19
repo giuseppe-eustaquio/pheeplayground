@@ -50,6 +50,29 @@
   margin: 0.5rem 0 0;
 }
 
+.tt-stats {
+  display: grid;
+  gap: 0.45rem;
+  margin: 1rem 0 0;
+  text-align: left;
+}
+
+.tt-stats div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tt-stats dt {
+  color: var(--muted);
+}
+
+.tt-stats dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .tt-preview {
   display: grid;
   grid-template-columns: repeat(4, 1rem);
@@ -104,5 +127,4 @@
   .tt-controls .button {
     padding: 0.5rem 0.65rem;
   }
-
 }

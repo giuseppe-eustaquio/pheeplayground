@@ -2,5 +2,6 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.Identifier
+*:Zone.Identifier
 __pycache__/
 *.pyc
