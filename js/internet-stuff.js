@@ -1,13 +1,14 @@
 import { getPheeImages } from "./phee.js";
 
 const FACT_API = "https://uselessfacts.jsph.pl/api/v2/facts";
+const FACT_API_HOME = "https://uselessfacts.jsph.pl";
 const factText = document.getElementById("fact-text");
 const factSource = document.getElementById("fact-source");
 const factBtn = document.getElementById("fact-btn");
 
 async function loadFact(random = false) {
   factBtn.disabled = true;
-  factText.textContent = random ? "Finding a random fact..." : "Fetching today's fact...";
+  factText.textContent = "Thinking...";
   factSource.hidden = true;
   try {
     const endpoint = random ? "random" : "today";
@@ -19,12 +20,24 @@ async function loadFact(random = false) {
     factText.textContent = data.text;
     if (data.source_url) {
       factSource.replaceChildren();
-      const link = document.createElement("a");
-      link.href = data.source_url;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = data.source || "Fact source";
-      factSource.append("Source: ", link);
+
+      const factLabel = document.createElement("span");
+      factLabel.textContent = "Fact source: ";
+      const factLink = document.createElement("a");
+      factLink.href = data.source_url;
+      factLink.target = "_blank";
+      factLink.rel = "noopener noreferrer";
+      factLink.textContent = (data.source || "djtech").replace(/\.net$/i, "");
+
+      const apiLabel = document.createElement("span");
+      apiLabel.textContent = "API source: ";
+      const apiLink = document.createElement("a");
+      apiLink.href = FACT_API_HOME;
+      apiLink.target = "_blank";
+      apiLink.rel = "noopener noreferrer";
+      apiLink.textContent = "useless facts API";
+
+      factSource.append(factLabel, factLink, document.createElement("br"), apiLabel, apiLink);
       factSource.hidden = false;
     }
   } catch (err) {
@@ -49,7 +62,7 @@ async function loadRandomAdvice() {
   adviceBtn.disabled = true;
   adviceSearchBtn.disabled = true;
   adviceSearchStatus.textContent = "";
-  adviceText.textContent = "Finding some advice...";
+  adviceText.textContent = "Thinking...";
   try {
     const response = await fetch(`${ADVICE_API}/advice?cache=${Date.now()}`);
     if (!response.ok) throw new Error("API returned " + response.status);
@@ -81,7 +94,7 @@ adviceSearch.addEventListener("submit", async (event) => {
   adviceSearchBtn.disabled = true;
   adviceBtn.disabled = true;
   adviceSearchStatus.textContent = "";
-  adviceText.textContent = "Searching advice...";
+  adviceText.textContent = "Thinking...";
   try {
     const response = await fetch(`${ADVICE_API}/advice/search/${encodeURIComponent(query)}`);
     if (!response.ok) throw new Error("API returned " + response.status);
@@ -110,7 +123,7 @@ const JOKE_FLAGS = "nsfw,religious,political,racist,sexist,explicit";
 
 async function loadJoke() {
   jokeBtn.disabled = true;
-  jokeText.textContent = "Finding a joke...";
+  jokeText.textContent = "Thinking...";
   try {
     const response = await fetch(`${JOKE_API}?blacklistFlags=${JOKE_FLAGS}`);
     if (!response.ok) throw new Error("API returned " + response.status);

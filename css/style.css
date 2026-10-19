@@ -329,8 +329,51 @@ main,
   color: var(--muted);
   font-size: 0.9rem;
 }
+.service-source {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
 .fact-source[hidden] {
   display: none;
+}
+
+.phee-chat {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.phee-avatar {
+  flex: none;
+  width: 5rem;
+  height: 5rem;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  object-fit: cover;
+}
+.phee-bubble {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--bg);
+}
+.phee-bubble::before {
+  position: absolute;
+  top: 1.1rem;
+  left: -0.4rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-bottom: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+  background: var(--bg);
+  content: "";
+  transform: rotate(45deg);
+}
+.phee-bubble .fact-text {
+  margin: 0;
 }
 
 @media (max-width: 36rem) {
@@ -340,6 +383,16 @@ main,
   .fact-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .phee-chat {
+    gap: 0.65rem;
+  }
+  .phee-avatar {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  .phee-bubble {
+    padding: 0.8rem 0.9rem;
   }
 }
 

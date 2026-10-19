@@ -75,7 +75,12 @@
           </div>
           <button class="button" id="fact-btn" type="button">Random fact</button>
         </div>
-        <p class="fact-text" id="fact-text" role="status" aria-live="polite">Fetching today's fact...</p>
+        <div class="phee-chat">
+          <img class="phee-avatar" src="images/phee/phee4.jpg" alt="Phee sharing a fact" />
+          <div class="phee-bubble">
+            <p class="fact-text" id="fact-text" role="status" aria-live="polite">Thinking...</p>
+          </div>
+        </div>
         <p class="fact-source" id="fact-source" hidden></p>
       </section>
 
@@ -87,7 +92,12 @@
           </div>
           <button class="button" id="advice-btn" type="button">Random advice</button>
         </div>
-        <p class="fact-text" id="advice-text" role="status" aria-live="polite">Fetching some advice...</p>
+        <div class="phee-chat">
+          <img class="phee-avatar" src="images/phee/phee.jpg" alt="Phee sharing advice" />
+          <div class="phee-bubble">
+            <p class="fact-text" id="advice-text" role="status" aria-live="polite">Thinking...</p>
+          </div>
+        </div>
         <form class="advice-search" id="advice-search">
           <label for="advice-query">Search advice (one word)</label>
           <div class="search-controls">
@@ -96,6 +106,10 @@
           </div>
           <p class="form-status" id="advice-search-status" role="status" aria-live="polite"></p>
         </form>
+        <p class="service-source">
+          Source:
+          <a href="https://adviceslip.com/" target="_blank" rel="noopener noreferrer">Advice Slip</a>
+        </p>
       </section>
 
       <section class="section facts" id="jokes" aria-labelledby="jokes-title">
@@ -106,7 +120,16 @@
           </div>
           <button class="button" id="joke-btn" type="button">Another joke</button>
         </div>
-        <div class="fact-text" id="joke-text" role="status" aria-live="polite">Fetching a joke...</div>
+        <div class="phee-chat">
+          <img class="phee-avatar" src="images/phee/phee6.jpg" alt="Phee sharing a joke" />
+          <div class="phee-bubble">
+            <div class="fact-text" id="joke-text" role="status" aria-live="polite">Thinking...</div>
+          </div>
+        </div>
+        <p class="service-source">
+          Source:
+          <a href="https://jokeapi.dev/" target="_blank" rel="noopener noreferrer">JokeAPI</a>
+        </p>
       </section>
     </main>
 
