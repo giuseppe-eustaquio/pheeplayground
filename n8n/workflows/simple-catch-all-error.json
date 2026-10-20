@@ -1,0 +1,122 @@
+{
+  "name": "Simple Catch-All Error Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "09f7fa44-9506-438e-9666-6e83c47749d5",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "position": [
+        1104,
+        320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sendTo": "user@example.com",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "id": "82b963c5-b2ba-47f4-a32c-283b23c16dc5",
+      "name": "Alert on Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1904,
+        320
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "content": "### Connect the tool where you want to be alerted in \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 315,
+        "width": 408,
+        "color": 7
+      },
+      "id": "6a3a6e62-ea16-4fd1-921a-6c3e02be7983",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1760,
+        224
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Edit the error message",
+        "height": 272,
+        "width": 368,
+        "color": 7
+      },
+      "id": "58027c7b-f667-44f1-9775-60983ab92268",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        224
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "message",
+              "value": "=⚠️ Workflow `{{$json[\"workflow\"][\"name\"]}}` failed to run! [execution]({{ $json.execution.url }})"
+            },
+            {
+              "name": "subject",
+              "value": "=Workflow Error: `{{ $json.workflow.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5829d49d-5b4b-4a18-b1e3-fe21ee1e4486",
+      "name": "Set error message",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1456,
+        320
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set error message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set error message": {
+      "main": [
+        [
+          {
+            "node": "Alert on Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": []
+}

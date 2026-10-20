@@ -1,0 +1,524 @@
+{
+  "name": "Sheet Weather Tracking",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## How it works\nThis workflow automates global weather monitoring. It triggers every 6 hours to fetch current weather, 5-day forecasts, and Air Quality Index (AQI) data for multiple cities via OpenWeatherMap. \n\nUsing custom JavaScript and OpenAI's GPT-4o-mini, it calculates a 'Comfort Index' and identifies weather risks (e.g., extreme heat or poor AQI). It then routes prioritized alerts or routine briefings to Discord, while archiving all data in Google Sheets for history.\n\n## Setup steps\n1. **Credentials:** Connect OpenWeatherMap, OpenAI, and Discord (Webhook).\n2. **Locations:** Edit the 'Set Monitoring Locations' node with your target cities' Lat/Lon.\n3. **Google Sheets:** Open the 'Log to Google Sheets' node and provide your **Spreadsheet ID** and **Sheet Name**.\n4. **Discord:** Ensure your Webhook URL is correctly configured in the Discord nodes.",
+        "height": 690,
+        "width": 500
+      },
+      "id": "44e50fda-897b-49ae-bdf0-9a9f5ed832c7",
+      "name": "Main Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "##  PART 1: Setup & Iteration\nTrigger the flow and define the list of cities to monitor using coordinates.",
+        "height": 400,
+        "width": 750,
+        "color": 7
+      },
+      "id": "b5d3c273-687d-4ad7-9e69-afa249decd64",
+      "name": "Part 1 Sticky",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        336,
+        544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## PART 2: Data Collection\nFetches current weather, forecasts, and air pollution data simultaneously for each location.",
+        "height": 600,
+        "width": 700,
+        "color": 7
+      },
+      "id": "53ff14a7-ab04-48b8-bd0f-7dff00da8493",
+      "name": "Part 2 Sticky",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1136,
+        432
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## PART 4: Delivery & Logging\nSends to Google Sheets",
+        "height": 500,
+        "width": 750,
+        "color": 7
+      },
+      "id": "5947a0c3-e708-42b8-8bf7-a892631291eb",
+      "name": "Part 4 Sticky",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2784,
+        544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "096af2c7-b477-45aa-9d75-9be21ee895d6",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        384,
+        736
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\"cities\":\n[{\"city\": \"Tokyo\", \"lat\": \"35.6762\", \"lon\": \"139.6503\", \"timezone\": \"Asia/Tokyo\"}, {\"city\": \"New York\", \"lat\": \"40.7128\", \"lon\": \"-74.0060\", \"timezone\": \"America/New_York\"}, {\"city\": \"London\", \"lat\": \"51.5074\", \"lon\": \"-0.1278\", \"timezone\": \"Europe/London\"},\n{\"city\": \"Manila\", \"lat\": \"14.6042\", \"lon\": \"120.9822\", \"timezone\": \"Asia/Manila\"}]\n}",
+        "options": {}
+      },
+      "id": "7c54c5c2-975f-4303-8653-ecf23fb4b316",
+      "name": "Set Monitoring Locations",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        608,
+        736
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=cities",
+        "options": {}
+      },
+      "id": "58eab7d1-46f2-4f46-b3cb-c953eb261e29",
+      "name": "Split Locations",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        816,
+        736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "locationSelection": "coordinates",
+        "latitude": "={{ $json.lat }}",
+        "longitude": "={{ $json.lon }}",
+        "language": "en"
+      },
+      "id": "bbe0966e-013b-4026-be8e-e2970549eb12",
+      "name": "Get Current Weather",
+      "type": "n8n-nodes-base.openWeatherMap",
+      "position": [
+        1184,
+        544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "5DayForecast",
+        "locationSelection": "coordinates",
+        "latitude": "={{ $json.lat }}",
+        "longitude": "={{ $json.lon }}",
+        "language": "en"
+      },
+      "id": "02dedb24-1006-4443-ad1e-d0eb42ef7278",
+      "name": "Get 5-Day Forecast",
+      "type": "n8n-nodes-base.openWeatherMap",
+      "position": [
+        1184,
+        736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "=http://api.openweathermap.org/data/2.5/air_pollution?lat={{ $json.lat }}&lon={{ $json.lon }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "options": {}
+      },
+      "id": "0846718d-1870-4637-9223-8b29d7d152a5",
+      "name": "Get Air Quality Index",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1184,
+        928
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "739712b3-9a6c-4a1e-ae65-03727a89ff5d",
+      "name": "Merge Weather Data",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1440,
+        640
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "e81e7992-b06f-4abb-99c1-170f2d8b62c7",
+      "name": "Merge with Air Quality",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1632,
+        736
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const current = item.json;\n  \n  const temp = current.main?.temp || 0;\n  const humidity = current.main?.humidity || 0;\n  const windSpeed = current.wind?.speed || 0;\n  const weatherDesc = current.weather?.[0]?.description || 'unknown';\n  const weatherMain = current.weather?.[0]?.main || 'unknown';\n  \n  const aqi = current.list?.[0]?.main?.aqi || 1;\n  const aqiLabels = ['Good', 'Fair', 'Moderate', 'Poor', 'Very Poor'];\n  const aqiLabel = aqiLabels[aqi - 1] || 'Unknown';\n  \n  const comfortIndex = Math.round(100 - Math.abs(temp - 22) * 2 - (humidity > 70 ? (humidity - 70) : 0));\n  \n  const alerts = [];\n  if (temp > 35) alerts.push('🔥 Extreme Heat Warning');\n  if (temp < 0) alerts.push('❄️ Freezing Temperature Alert');\n  if (windSpeed > 15) alerts.push('💨 High Wind Advisory');\n  if (aqi >= 4) alerts.push('😷 Poor Air Quality Alert');\n  if (weatherMain === 'Thunderstorm') alerts.push('⛈️ Thunderstorm Warning');\n  \n  results.push({\n    json: {\n      city: current.name || 'Unknown',\n      country: current.sys?.country || '',\n      timestamp: new Date().toISOString(),\n      current: {\n        temperature: temp,\n        feelsLike: current.main?.feels_like || temp,\n        humidity: humidity,\n        windSpeed: windSpeed,\n        weather: weatherDesc,\n        weatherMain: weatherMain\n      },\n      airQuality: {\n        aqi: aqi,\n        label: aqiLabel\n      },\n      analysis: {\n        comfortIndex: Math.max(0, Math.min(100, comfortIndex)),\n        alerts: alerts,\n        hasAlerts: alerts.length > 0\n      }\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "87f50c02-fca1-410e-90c4-bf126254a3fd",
+      "name": "Process and Analyze Data",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1936,
+        736
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "d4d68400-b92f-4a4a-b681-82d7e14a893a",
+      "name": "Aggregate All Locations",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        2160,
+        736
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const aggregatedData = $('Aggregate All Locations').first().json.data;\nconst aiAnalysis = $input.first().json.text || 'Analysis unavailable';\n\nlet report = `🌍 **WEATHER INTELLIGENCE REPORT**\\n`;\nreport += `━━━━━━━━━━━━━━━━━━━━━━━\\n\\n`;\n\nfor (const loc of aggregatedData) {\n  report += `📍 **${loc.city}**\\n`;\n  report += `├ 🌡️ ${loc.current.temperature}°C (Comfort: ${loc.analysis.comfortIndex}/100)\\n`;\n  report += `├ 🫁 AQI: ${loc.airQuality.label}\\n`;\n  if (loc.analysis.alerts.length > 0) report += `├ ⚠️ ALERT: ${loc.analysis.alerts.join(', ')}\\n`;\n  report += `\\n`;\n}\n\nreport += `🤖 **AI ANALYSIS**\\n${aiAnalysis}`;\n\nreturn [{\n  json: {\n    report: report,\n    hasAlerts: aggregatedData.some(loc => loc.analysis.hasAlerts)\n  }\n}];"
+      },
+      "id": "b1c42127-4828-48d3-a51b-16078804bcbb",
+      "name": "Format Weather Report",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2592,
+        736
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "<Sheet ID here>",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Weather",
+              "displayName": "Weather",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "City",
+              "displayName": "City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "report",
+              "displayName": "report",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hasAlerts",
+              "displayName": "hasAlerts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "b37f6d6b-d36e-4304-84be-07f8cb1a8ffe",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2912,
+        736
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "content": "## PART 3: AI Analysis\nCalculates comfort metrics and uses GPT-4 to generate human-like weather briefings.",
+        "height": 400,
+        "width": 850,
+        "color": 7
+      },
+      "id": "d5bad103-a978-455f-a551-21097826729f",
+      "name": "Part 3 Sticky",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1888,
+        544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this weather data: {{ JSON.stringify($json.data) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional meteorologist. Provide: 1) Comparison of conditions, 2) Highlights/concerns, 3) Best city for outdoor activities today. Keep under 200 words with emojis."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        2320,
+        736
+      ],
+      "id": "bf9f48c1-b92c-43ab-b017-95531e04c176",
+      "name": "AI Weather Analysis1"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        2304,
+        944
+      ],
+      "id": "148476f6-9361-4ee2-ab0b-9ea6d7973402",
+      "name": "Groq Chat Model"
+    }
+  ],
+  "connections": {
+    "Split Locations": {
+      "main": [
+        [
+          {
+            "node": "Get Current Weather",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get 5-Day Forecast",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Air Quality Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Monitoring Locations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get 5-Day Forecast": {
+      "main": [
+        [
+          {
+            "node": "Merge Weather Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Weather Data": {
+      "main": [
+        [
+          {
+            "node": "Merge with Air Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Weather": {
+      "main": [
+        [
+          {
+            "node": "Merge Weather Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Weather Report": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Air Quality Index": {
+      "main": [
+        [
+          {
+            "node": "Merge with Air Quality",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge with Air Quality": {
+      "main": [
+        [
+          {
+            "node": "Process and Analyze Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Locations": {
+      "main": [
+        [
+          {
+            "node": "AI Weather Analysis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process and Analyze Data": {
+      "main": [
+        [
+          {
+            "node": "Aggregate All Locations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Monitoring Locations": {
+      "main": [
+        [
+          {
+            "node": "Split Locations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Weather Analysis1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Weather Analysis1": {
+      "main": [
+        [
+          {
+            "node": "Format Weather Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": []
+}

@@ -4,7 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Internet Stuff | Phee Playground</title>
-    <meta name="description" content="Little things from across the internet, powered by free APIs." />
+    <meta
+      name="description"
+      content="Little things from across the internet, powered by free APIs."
+    />
     <script>
       try {
         var t = localStorage.getItem("theme");
@@ -26,21 +29,56 @@
     <button class="cornify-button" id="cornify-btn" type="button">
       Cornify this page <span aria-hidden="true">✨</span>
     </button>
-    <p class="cornify-status" id="cornify-status" role="status" aria-live="polite"></p>
+    <p
+      class="cornify-status"
+      id="cornify-status"
+      role="status"
+      aria-live="polite"
+    ></p>
     <header class="site-header">
       <a class="brand" href="index.html">Phee Playground</a>
-      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      <button
+        class="nav-toggle"
+        id="nav-toggle"
+        aria-expanded="false"
+        aria-controls="site-nav"
+      >
+        Menu
+      </button>
       <nav class="site-nav" id="site-nav" aria-label="Main">
         <a href="internet-stuff.html" aria-current="page">Internet Stuff</a>
+        <a href="n8n.html">n8n</a>
         <a href="playground.html">Playground</a>
-        <button class="theme-toggle" id="theme-toggle" type="button">Dark mode</button>
+        <button class="theme-toggle" id="theme-toggle" type="button">
+          Dark mode
+        </button>
         <div class="accent-picker">
           <p class="accent-label" id="accent-label">Accent color</p>
           <div class="swatches" role="group" aria-labelledby="accent-label">
-            <button class="swatch" data-accent="blue" aria-label="Blue" aria-pressed="true"></button>
-            <button class="swatch" data-accent="coral" aria-label="Coral" aria-pressed="false"></button>
-            <button class="swatch" data-accent="green" aria-label="Green" aria-pressed="false"></button>
-            <button class="swatch" data-accent="violet" aria-label="Violet" aria-pressed="false"></button>
+            <button
+              class="swatch"
+              data-accent="blue"
+              aria-label="Blue"
+              aria-pressed="true"
+            ></button>
+            <button
+              class="swatch"
+              data-accent="coral"
+              aria-label="Coral"
+              aria-pressed="false"
+            ></button>
+            <button
+              class="swatch"
+              data-accent="green"
+              aria-label="Green"
+              aria-pressed="false"
+            ></button>
+            <button
+              class="swatch"
+              data-accent="violet"
+              aria-label="Violet"
+              aria-pressed="false"
+            ></button>
           </div>
         </div>
       </nav>
@@ -56,15 +94,24 @@
           <figcaption class="dog-bar">
             <span id="dog-caption" role="status">Phee</span>
             <div class="dog-actions">
-              <button class="button" id="dog-api-btn" type="button">Random dog</button>
-              <button class="button" id="phee-btn" type="button">Random Phee</button>
+              <button class="button" id="dog-api-btn" type="button">
+                Random dog
+              </button>
+              <button class="button" id="phee-btn" type="button">
+                Random Phee
+              </button>
             </div>
           </figcaption>
-          <p class="dog-source">Random dog photos from the <a href="https://dog.ceo/dog-api/">Dog CEO API</a>.</p>
+          <p class="dog-source">
+            Random dog photos from the
+            <a href="https://dog.ceo/dog-api/">Dog CEO API</a>.
+          </p>
         </figure>
         <p class="fact-kicker">Curiosities &amp; surprises</p>
         <h1>Internet Stuff</h1>
-        <p class="lede">Little things from across the internet, powered by free APIs.</p>
+        <p class="lede">
+          Little things from across the internet, powered by free APIs.
+        </p>
       </section>
 
       <section class="section facts" id="facts" aria-labelledby="facts-title">
@@ -73,12 +120,25 @@
             <p class="fact-kicker">A small diversion</p>
             <h2 id="facts-title">Today's useless fact</h2>
           </div>
-          <button class="button" id="fact-btn" type="button">Random fact</button>
+          <button class="button" id="fact-btn" type="button">
+            Random fact
+          </button>
         </div>
         <div class="phee-chat">
-          <img class="phee-avatar" src="images/phee/phee4.jpg" alt="Phee sharing a fact" />
+          <img
+            class="phee-avatar"
+            src="images/phee/phee4.jpg"
+            alt="Phee sharing a fact"
+          />
           <div class="phee-bubble">
-            <p class="fact-text" id="fact-text" role="status" aria-live="polite">Thinking...</p>
+            <p
+              class="fact-text"
+              id="fact-text"
+              role="status"
+              aria-live="polite"
+            >
+              Thinking...
+            </p>
           </div>
         </div>
         <p class="fact-source" id="fact-source" hidden></p>
@@ -90,25 +150,57 @@
             <p class="fact-kicker">A little perspective</p>
             <h2 id="advice-title">A piece of advice</h2>
           </div>
-          <button class="button" id="advice-btn" type="button">Random advice</button>
+          <button class="button" id="advice-btn" type="button">
+            Random advice
+          </button>
         </div>
         <div class="phee-chat">
-          <img class="phee-avatar" src="images/phee/phee.jpg" alt="Phee sharing advice" />
+          <img
+            class="phee-avatar"
+            src="images/phee/phee.jpg"
+            alt="Phee sharing advice"
+          />
           <div class="phee-bubble">
-            <p class="fact-text" id="advice-text" role="status" aria-live="polite">Thinking...</p>
+            <p
+              class="fact-text"
+              id="advice-text"
+              role="status"
+              aria-live="polite"
+            >
+              Thinking...
+            </p>
           </div>
         </div>
         <form class="advice-search" id="advice-search">
           <label for="advice-query">Search advice (one word)</label>
           <div class="search-controls">
-            <input id="advice-query" name="query" type="search" required maxlength="80" autocomplete="off" />
-            <button class="button" id="advice-search-btn" type="submit">Search</button>
+            <input
+              id="advice-query"
+              name="query"
+              type="search"
+              required
+              maxlength="80"
+              autocomplete="off"
+            />
+            <button class="button" id="advice-search-btn" type="submit">
+              Search
+            </button>
           </div>
-          <p class="form-status" id="advice-search-status" role="status" aria-live="polite"></p>
+          <p
+            class="form-status"
+            id="advice-search-status"
+            role="status"
+            aria-live="polite"
+          ></p>
         </form>
         <p class="service-source">
           Source:
-          <a href="https://adviceslip.com/" target="_blank" rel="noopener noreferrer">Advice Slip</a>
+          <a
+            href="https://adviceslip.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Advice Slip</a
+          >
         </p>
       </section>
 
@@ -118,17 +210,35 @@
             <p class="fact-kicker">For a quick giggle</p>
             <h2 id="jokes-title">Random joke</h2>
           </div>
-          <button class="button" id="joke-btn" type="button">Another joke</button>
+          <button class="button" id="joke-btn" type="button">
+            Another joke
+          </button>
         </div>
         <div class="phee-chat">
-          <img class="phee-avatar" src="images/phee/phee6.jpg" alt="Phee sharing a joke" />
+          <img
+            class="phee-avatar"
+            src="images/phee/phee6.jpg"
+            alt="Phee sharing a joke"
+          />
           <div class="phee-bubble">
-            <div class="fact-text" id="joke-text" role="status" aria-live="polite">Thinking...</div>
+            <div
+              class="fact-text"
+              id="joke-text"
+              role="status"
+              aria-live="polite"
+            >
+              Thinking...
+            </div>
           </div>
         </div>
         <p class="service-source">
           Source:
-          <a href="https://jokeapi.dev/" target="_blank" rel="noopener noreferrer">JokeAPI</a>
+          <a
+            href="https://jokeapi.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >JokeAPI</a
+          >
         </p>
       </section>
     </main>

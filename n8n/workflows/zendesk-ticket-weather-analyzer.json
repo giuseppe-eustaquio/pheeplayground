@@ -1,0 +1,397 @@
+{
+  "name": "Zendesk Ticket Weather Analyzer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "138c6eb8-1fc9-404d-a85f-037f6775021e",
+        "authentication": "basicAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        48
+      ],
+      "id": "8ff9111c-16a7-4824-9233-4c707b1fd5f5",
+      "name": "Webhook for Zendesk"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\"city\": \"Manila\", \"lat\": \"14.6042\", \"lon\": \"120.9822\", \"timezone\": \"Asia/Manila\"}",
+        "options": {}
+      },
+      "id": "218df00e-ccb2-4876-b0a9-5d6c3d30e4e9",
+      "name": "Set Monitoring Location",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        224,
+        192
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "locationSelection": "coordinates",
+        "latitude": "={{ $json.lat }}",
+        "longitude": "={{ $json.lon }}"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        416,
+        176
+      ],
+      "id": "14014225-87a1-4c97-a5cf-9959fb704e30",
+      "name": "Get Current Weather"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "892688a8-04da-41a7-9ee9-b058191640ca",
+              "name": "id",
+              "value": "={{ $json.body.id }}",
+              "type": "string"
+            },
+            {
+              "id": "76dec5a5-3a21-4906-8436-ae177c4d11d7",
+              "name": "status",
+              "value": "={{ $json.body.status }}",
+              "type": "string"
+            },
+            {
+              "id": "d460abe2-45f7-4a24-a1a5-d8233e1a3f67",
+              "name": "subject",
+              "value": "={{ $json.body.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "11bc9d6c-ae9e-4a9b-af26-178a7005087e",
+              "name": "tags",
+              "value": "={{ $json.body.tags }}",
+              "type": "array"
+            },
+            {
+              "id": "8516d797-71e1-4d89-8ec7-65bdd1301a62",
+              "name": "description",
+              "value": "={{ $json.body.description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "4f3fa0ef-c1df-45b9-a817-765bbafdbcce",
+      "name": "Get Necessary Ticket Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        848,
+        32
+      ],
+      "id": "92d3d341-ee3e-41c4-af1c-e8dfb58174ad",
+      "name": "Merge Ticket and Weather Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d44ac777-38d2-4f7e-8e4c-ee01e1ccb8ff",
+              "name": "temperature",
+              "value": "={{ $json.main.temp }}",
+              "type": "number"
+            },
+            {
+              "id": "576a1e29-5bdb-4820-9841-95f1d486d060",
+              "name": "country",
+              "value": "={{ $json.sys.country }}",
+              "type": "string"
+            },
+            {
+              "id": "66ebc086-d559-44ac-8573-0faa4fbd53e1",
+              "name": "weather",
+              "value": "={{ $json.weather[0].main }}",
+              "type": "string"
+            },
+            {
+              "id": "6b250dc8-04f3-4f4f-be0a-cce78a67ed59",
+              "name": "weather_description",
+              "value": "={{ $json.weather[0].description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        640,
+        176
+      ],
+      "id": "0b280e35-283e-4b8b-ba52-bcda8a7918e2",
+      "name": "Get Necessary Weather Fields"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1072,
+        208
+      ],
+      "id": "8c92ec38-f80d-426d-9b42-b1de335a85d7",
+      "name": "Groq Chat Model"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this ticket content:\nTicket subject: {{ $json.subject }}\nTicket content: {{ $json.description }}\n\nCurrent weather data:\nCountry code: {{ $json.country }}\nWeather: {{ $json.weather }}\nWeather description: {{ $json.weather_description }}\nTemperature: {{ $json.temperature }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional meteorologist and ticket analyzer. Your first task is to analyze the ticket message that will come in. Next, analyze the current weather. Finally, create an internal note to see if the issue could be related to the current weather or note. Make your final output just plain text (no markdown), but add paragraphs/extra lines to make it readable as a final Zendesk internal note"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1072,
+        32
+      ],
+      "id": "127e248e-acfb-470d-b7e9-a614f41496db",
+      "name": "Analyze Weather and Output Internal Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  let text = item.json.text;\n\n  // Strip markdown formatting\n  text = text\n    .replace(/\\*\\*(.*?)\\*\\*/g, '$1')     // bold\n    .replace(/^#+\\s*/gm, '')              // headers\n    .replace(/^>\\s?/gm, '')               // blockquotes\n    .replace(/^-\\s+/gm, '• ')             // bullet points → simple dash/bullet\n    .replace(/\\n{3,}/g, '\\n\\n');          // collapse extra blank lines\n\n  results.push({\n    json: {\n      note: text.trim()\n    }\n  });\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        32
+      ],
+      "id": "d1fd9f85-c571-4152-93d5-5ee03d189da9",
+      "name": "Remove markdown"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "id": "={{ $('Merge Ticket and Weather Data').item.json.id }}",
+        "updateFields": {
+          "internalNote": "={{ $json.note }}"
+        }
+      },
+      "type": "n8n-nodes-base.zendesk",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        0
+      ],
+      "id": "2452ee08-c80b-4356-9692-67187800902c",
+      "name": "Update a ticket"
+    },
+    {
+      "parameters": {
+        "content": "\n## Prerequisite\n1. **Credentials:** Connect OpenWeatherMap, Groq, Zendesk\n2. **Zendesk:**. setup a trigger and webhook to send a POST request to the webhook URL in the workflow whenever a new ticket comes in\n\nThis workflow will run for every new ticket",
+        "height": 194,
+        "width": 388
+      },
+      "id": "21c6c6a0-118c-48c6-8186-dad3e4adf419",
+      "name": "Main Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "##  PART 1: Receive and setup data\nReceive data from Zendesk and get only the necessary fields\nGet Current Weather data from Open Weather Map API and get only the necessary fields\nMerge the data",
+        "height": 496,
+        "width": 862,
+        "color": 7
+      },
+      "id": "29473b49-e1a9-4009-908c-a945a57bec6d",
+      "name": "Part 1 Sticky",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        112,
+        -128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "##  PART 2: Have AI Analyze the Ticket data\nAI will analyze the contents of the ticket and the current weather to check if the issue is caused by weather-related factors",
+        "height": 496,
+        "width": 622,
+        "color": 7
+      },
+      "id": "390dfca6-2451-4329-881b-7fbe1af7ab4f",
+      "name": "Part 1 Sticky1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1008,
+        -144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "##  PART 3: Send Analysis to Zendesk\nAI's analysis will be sent to the ticket as an internal note",
+        "height": 496,
+        "width": 622,
+        "color": 7
+      },
+      "id": "edb2f5dd-6aa2-4496-b9b7-6c94b0a726a3",
+      "name": "Part 1 Sticky2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1632,
+        -144
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Webhook for Zendesk": {
+      "main": [
+        [
+          {
+            "node": "Get Necessary Ticket Fields",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Monitoring Location",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Monitoring Location": {
+      "main": [
+        [
+          {
+            "node": "Get Current Weather",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Weather": {
+      "main": [
+        [
+          {
+            "node": "Get Necessary Weather Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Necessary Ticket Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge Ticket and Weather Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Necessary Weather Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge Ticket and Weather Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Ticket and Weather Data": {
+      "main": [
+        [
+          {
+            "node": "Analyze Weather and Output Internal Note",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Weather and Output Internal Note",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Weather and Output Internal Note": {
+      "main": [
+        [
+          {
+            "node": "Remove markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove markdown": {
+      "main": [
+        [
+          {
+            "node": "Update a ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": []
+}

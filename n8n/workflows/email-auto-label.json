@@ -1,0 +1,426 @@
+{
+  "name": "Email Auto-Label",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Add AI labels to Gmail messages\nWith this workflow you can automatically set labels for your Gmail message according to its content. \n\nIn this workflow available are 3 labels: \"Jobs\", \"Security\" and \"Subscriptions\". Feel free to adjust labels according to your needs. \n\n**Please remember to set label names both in your Gmail account and workflow.**",
+        "height": 240.57943708322733,
+        "width": 420.4803040774015,
+        "color": 4
+      },
+      "id": "b824ef83-5f78-4f63-a518-2f92c144cab6",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -464,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "###\n\n\n\n\n\n\n\n\n\n\n### JSON schema\nEdit JSON schema and label names according to your needs.\n\n⚠️ **Label names in system prompt and JSON schema should be the same.**",
+        "height": 527,
+        "width": 242
+      },
+      "id": "21770e86-d0f6-4f26-b0fa-9a44597f4c63",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        832,
+        368
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Merge labels\nCombine labels retrieved from Gmail account and assigned by AI together.",
+        "height": 347.0476323933831,
+        "width": 226.14233872620645
+      },
+      "id": "c5b63be5-0bf9-4d43-ad23-bef2b984ece5",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1568,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Aggregarte labels and add to message\nCreate array of label IDs and add to the desired email message in Gmail.",
+        "height": 347.0476323933831,
+        "width": 452.48413953150185
+      },
+      "id": "ee62552b-167b-4fcd-911a-ececf89240b8",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1824,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Get message content\nBased on Gmail message ID retrieve body content of the email and pass it to AI chain.\n\nWe're only limiting this to 1 message due to API tokens limitations.",
+        "height": 348.5873725349161,
+        "width": 238.4602598584674
+      },
+      "id": "8248b08a-cf2a-4992-97dd-be53c4b26bee",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Assign labels\nLet the AI decide which labels suit the best content of the message.\n\n⚠️ **Remember to edit system prompt** - modify label names and instructions according to your needs.",
+        "height": 348.5873725349161,
+        "width": 378.57661273793565
+      },
+      "id": "372174d8-28d4-4b79-b26b-05caf48aab03",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Get many messages').item.json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You assign labels to emails based on their content. The labels are:\n\nJobs\nSecurity\nSubscriptions\n\nEach email must have a label. If an email doesn't seem to accurately match with one of the labels, use the closest one. Return only label names in JSON format, nothing else. Do not make things up."
+            }
+          ]
+        }
+      },
+      "id": "d5b624f0-8079-4d1d-840b-9041fdfcbda6",
+      "name": "Assign labels for message",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        688,
+        176
+      ],
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"labels\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\",\n        \"enum\": [\"Jobs\", \"Security\", \"Subscriptions\"]\n      }\n    }\n  },\n  \"required\": [\"labels\"]\n}"
+      },
+      "id": "615765a5-68c8-4854-b385-82c1d625ffa9",
+      "name": "JSON Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        912,
+        384
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "72d11a72-6693-447c-b7ca-4ba1a3579075",
+              "name": "labels",
+              "type": "array",
+              "value": "={{ $json.output.labels }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "33a10a02-619a-480a-93fe-92a164a368f9",
+      "name": "Set label values",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1072,
+        176
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "id": "4e5e2d8f-1880-4d5c-964e-18156296f20a",
+      "name": "Get all labels",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1344,
+        48
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "labels",
+        "options": {}
+      },
+      "id": "cc88d3cb-50fb-4c49-bd62-ca766a72a375",
+      "name": "Split out assigned labels",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        1344,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "name",
+              "field2": "labels"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "572b789a-5993-4a1e-b4cb-08713862d608",
+      "name": "Merge corresponding labels",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1632,
+        176
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "75616d00-6185-4c46-9430-c2b8cfc44143",
+      "name": "Aggregate label IDs",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        1888,
+        176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Get many messages').item.json[\"id\"] }}",
+        "labelIds": "={{ $json.id }}"
+      },
+      "id": "3b5cba80-30ee-4f21-bbef-ee62703604d8",
+      "name": "Add labels to message",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2112,
+        176
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        576,
+        384
+      ],
+      "id": "314bb309-8fa8-41a5-bc07-58d1daff10a6",
+      "name": "Groq Chat Model"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        160
+      ],
+      "id": "2107e7d3-ca89-41a8-af13-5fbe5531919b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "content": "### Get messages\nManual trigger to get the latest 10 messages",
+        "height": 365,
+        "width": 318
+      },
+      "id": "cafa2a45-5794-4737-848a-a4a856db408e",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        224
+      ],
+      "id": "eff9345a-55a4-40f1-8618-c3a6388bf8b4",
+      "name": "Get many messages"
+    }
+  ],
+  "connections": {
+    "JSON Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Assign labels for message",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all labels": {
+      "main": [
+        [
+          {
+            "node": "Merge corresponding labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set label values": {
+      "main": [
+        [
+          {
+            "node": "Get all labels",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split out assigned labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate label IDs": {
+      "main": [
+        [
+          {
+            "node": "Add labels to message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assign labels for message": {
+      "main": [
+        [
+          {
+            "node": "Set label values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split out assigned labels": {
+      "main": [
+        [
+          {
+            "node": "Merge corresponding labels",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge corresponding labels": {
+      "main": [
+        [
+          {
+            "node": "Aggregate label IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Assign labels for message",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Assign labels for message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": []
+}

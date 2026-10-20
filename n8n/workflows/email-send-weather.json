@@ -1,0 +1,389 @@
+{
+  "name": "Email Weather Data",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "id",
+              "value": "1701668"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "301c5703-e3dd-4b65-a0ae-bce4141ae06a",
+      "name": "Get Weather Data"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "55daad60-dcb7-46c3-bd4b-115a7c5cef71",
+      "name": "Run every hour"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b8f01f74-ee3c-4c4a-8e03-8c3b08b6b5e4",
+              "name": "main",
+              "value": "={{ $json.weather[0].main }}",
+              "type": "string"
+            },
+            {
+              "id": "9f3d3dd9-dc58-4f1e-b56a-55676787ed20",
+              "name": "description",
+              "value": "={{ $json.weather[0].description }}",
+              "type": "string"
+            },
+            {
+              "id": "6142a110-a907-459e-9389-f3cdaa5f1cbb",
+              "name": "temp",
+              "value": "={{ $json.main.temp }}",
+              "type": "number"
+            },
+            {
+              "id": "8916219a-e07e-43c1-8385-a88863099848",
+              "name": "city",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "5fad59a8-622c-4e91-b423-15a330d30aba",
+              "name": "country code",
+              "value": "={{ $json.sys.country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "38d2bd88-2d09-4648-915b-1dcc30703eff",
+      "name": "Take only the necessary fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Weather: {{ $json.main }}\nDescription: {{ $json.description }}\nTemperature: {{ $json.temp }}\nCity: {{ $json.city }}\nCountry code: {{ $json['country code'] }}\n",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a weather update agent. You send the current weather  based on the data that will be provided, and some tips! The output format should be:\n\n{\n\t\"subject\": \"California\",\n\t\"text\": \"Hello! Thank you for your email.\"\n}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        672,
+        0
+      ],
+      "id": "9ca61329-e933-4bfe-8a8b-ad06c947e65e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        672,
+        208
+      ],
+      "id": "6316b6bf-eedd-443e-b460-d44ad5838ac3",
+      "name": "Groq Chat Model"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"subject\": \"California\",\n\t\"text\": \"Hello! Thank you for your email.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        208
+      ],
+      "id": "e7cdff4c-fc2c-4d9c-b689-4a4dbc564ee8",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "60998362-ced8-4dfa-93ed-bda29ef6714a",
+              "name": "response",
+              "value": "={{ $json.output.text }}",
+              "type": "string"
+            },
+            {
+              "id": "225f17c5-c3b7-45e5-abc6-ee8e647a6c36",
+              "name": "to",
+              "value": "user@example.com",
+              "type": "string"
+            },
+            {
+              "id": "d042a36e-5b36-4016-8017-61cd47765701",
+              "name": "subject",
+              "value": "={{ $json.output.subject }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "228378f5-14d7-45e3-810d-f1dd979f3f77",
+      "name": "Map fields for email processing"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.response }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        0
+      ],
+      "id": "53dc566a-57df-4be2-ba8a-d61f6aa111e7",
+      "name": "Convert email content to HTML"
+    },
+    {
+      "parameters": {
+        "content": "## Send current weather via AI\nThis workflow automatically gets current weather data via Open Weather API, and using AI sends an email with the current weather information and some tips.\n\n**Please remember to configure your AI Assistant first.**",
+        "height": 334,
+        "width": 420,
+        "color": 4
+      },
+      "id": "1de98a39-c335-46de-b4db-c1fb9a18b88e",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Schedule trigger\nRun once every hour",
+        "height": 313,
+        "width": 211
+      },
+      "id": "5e19c4e7-a722-456d-be75-96f4ab8f1017",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        -112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Get and Organize data\nGet OpenWeather API current weather data and remove unnecessary information",
+        "height": 313,
+        "width": 387
+      },
+      "id": "aab69d31-a4fb-4425-b19e-e6953fabc6f4",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        192,
+        -112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Send data to AI\nSend the necessary information to AI and have AI compose the email",
+        "height": 313,
+        "width": 387
+      },
+      "id": "e952412e-e92c-4c9e-bb8f-131ab11e17c0",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        -112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Prepare final email\nMap the final fields for the email and convert the email text to HTML",
+        "height": 313,
+        "width": 419
+      },
+      "id": "78e72bf7-e2f0-4c7c-afb2-e4378bb07fb4",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        -112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1504,
+        0
+      ],
+      "id": "2e4ca5aa-698b-49fc-9bc9-4c212a151f3b",
+      "name": "Send weather data"
+    }
+  ],
+  "connections": {
+    "Run every hour": {
+      "main": [
+        [
+          {
+            "node": "Get Weather Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Weather Data": {
+      "main": [
+        [
+          {
+            "node": "Take only the necessary fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Take only the necessary fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Map fields for email processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map fields for email processing": {
+      "main": [
+        [
+          {
+            "node": "Convert email content to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert email content to HTML": {
+      "main": [
+        [
+          {
+            "node": "Send weather data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": []
+}

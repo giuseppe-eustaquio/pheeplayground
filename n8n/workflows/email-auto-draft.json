@@ -1,0 +1,407 @@
+{
+  "name": "Emaill Auto-Draft",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const encoded = Buffer.from($json.raw).toString('base64');\n\nreturn { encoded };"
+      },
+      "id": "54951d73-4a77-47e8-bef7-3d3f921c2c02",
+      "name": "Convert raw to base64",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        288,
+        80
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/drafts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"message\":{\"raw\":\"{{ $json.encoded }}\"}}",
+        "options": {}
+      },
+      "id": "f9aff6fb-599e-4b6f-bdcc-1f9e3521f70c",
+      "name": "Add email draft to thread",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        512,
+        80
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a77b2d79-1e70-410c-a657-f3d618154ea1",
+              "name": "response",
+              "type": "string",
+              "value": "={{ $json.output.text }}"
+            },
+            {
+              "id": "d270c18e-39a0-4d87-85f0-cc1ffc9c10ff",
+              "name": "to",
+              "type": "string",
+              "value": "={{ $('Get latest email').item.json.to.text }}"
+            },
+            {
+              "id": "30acb50b-bdde-44bf-803c-76e0ae65f526",
+              "name": "subject",
+              "type": "string",
+              "value": "={{ $json.output.subject }}"
+            },
+            {
+              "id": "88914536-8c25-4877-8914-feab5e32fae3",
+              "name": "messageId",
+              "type": "string",
+              "value": "={{ $('Get latest email').item.json[\"id\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "47520b40-3f02-429c-ae6d-10efe0ef226b",
+      "name": "Map fields for further processing",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -384,
+        80
+      ],
+      "typeVersion": 3.3
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.response }}",
+        "destinationKey": "response",
+        "options": {
+          "simpleLineBreaks": false
+        }
+      },
+      "id": "a0fd2183-d462-4d68-ba29-ff011f0ccc1a",
+      "name": "Convert response to HTML",
+      "type": "n8n-nodes-base.markdown",
+      "position": [
+        -160,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "913e9cb1-10de-4637-bf48-40272c7c7fe3",
+              "name": "raw",
+              "type": "string",
+              "value": "=To: {{ $json.to }}\nSubject: {{ $json.subject }}\nContent-Type: text/html; charset=\"utf-8\"\n\n{{ $json.response }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "40c32030-ebe4-4c80-82e7-664f46af8fd3",
+      "name": "Build email raw",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        64,
+        80
+      ],
+      "typeVersion": 3.3
+    },
+    {
+      "parameters": {
+        "content": "## Reply draft with OpenAI Assistant\nThis workflow automatically transfers content of incoming email messages with specific labels into OpenAI Assitant and returns reply draft. After draft is composed, trigger label is deleted from the thread.\n\n**Please remember to configure your OpenAI Assistant first.**",
+        "height": 334,
+        "width": 420,
+        "color": 4
+      },
+      "id": "b00204af-a196-4c39-b4f5-16185747688e",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1712,
+        -48
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Schedule trigger and get emails\nRun the workflow and get the latest email only",
+        "height": 313.3056033573073,
+        "width": 451.41125086385614
+      },
+      "id": "6e49cf16-8276-490b-b5a8-85c86f2b1274",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1248,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Generate reply\nTransfer email content to AI Assitant and return AI-generated reply.\n",
+        "height": 313.7892229150129,
+        "width": 381.6458068293894
+      },
+      "id": "da700b24-a0cc-456c-a210-f1fed6f5631f",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -816,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Create HTML message\nConvert incoming Markdown from AI Assistant into HTML content.",
+        "height": 314.75072291501283,
+        "width": 219.88389496558554
+      },
+      "id": "649044a7-377d-4c36-9854-1daffde5652b",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Build and encode message\nCreate raw message in RFC standard and encode it into base64 string (please see [Gmail API reference](https://developers.google.com/gmail/api/reference/rest/v1/users.drafts/create) for more details).",
+        "height": 314.75072291501283,
+        "width": 461.3148409669012
+      },
+      "id": "60058166-3686-4df1-9dd3-62967fec2f59",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Insert reply draft\nAdd reply draft from OpenAI Assistant to specific Gmail thread.",
+        "height": 314.75072291501283,
+        "width": 219.88389496558554
+      },
+      "id": "1787a68b-f8ab-4f94-99a8-25a721ea77c5",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        448,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        80
+      ],
+      "id": "89f39a5f-51d0-48db-8ae0-1f5cc6ac197d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Draft a reply for the following email.\n\nSubject: {{ $json.subject }}\nText: {{ $json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an assistant and your task is to draft a reply to the email provided by the user. Even if the email seems automated/sent by a bot, send a reply as if you are replying to a person and/or a person will receive it. Format your response as:\n\n{\n\t\"subject\": \"California\",\n\t\"text\": \"Hello! Thank you for your email.\"\n}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -736,
+        80
+      ],
+      "id": "c2a4f008-90fb-48a1-89e4-2b2d2c903ab1",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -736,
+        272
+      ],
+      "id": "3b18cc05-d6ea-4423-96f0-a5f769d0d846",
+      "name": "Groq Chat Model"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "id": "6ede1b48-4537-438c-9f58-43a7b3fb756e",
+      "name": "Get latest email",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -960,
+        80
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"subject\": \"California\",\n\t\"text\": \"Hello! Thank you for your email.\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -608,
+        288
+      ],
+      "id": "cff1b9e1-0566-4e66-9c64-1a9f25b18430",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "connections": {
+    "Build email raw": {
+      "main": [
+        [
+          {
+            "node": "Convert raw to base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert raw to base64": {
+      "main": [
+        [
+          {
+            "node": "Add email draft to thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert response to HTML": {
+      "main": [
+        [
+          {
+            "node": "Build email raw",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add email draft to thread": {
+      "main": [
+        []
+      ]
+    },
+    "Map fields for further processing": {
+      "main": [
+        [
+          {
+            "node": "Convert response to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get latest email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Map fields for further processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get latest email": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": []
+}

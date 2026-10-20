@@ -1,0 +1,71 @@
+/* n8n page only. Uses currentColor / inherit so it follows your light/dark theme
+   without needing to know your CSS variable names. */
+.n8n-list {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  align-items: start;
+}
+
+.n8n-card {
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.n8n-card h2,
+.n8n-card p,
+.n8n-card ul {
+  margin: 0;
+}
+
+.n8n-card ul:not(.n8n-tags) {
+  padding-left: 1.2rem;
+}
+
+.n8n-origin {
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.n8n-label {
+  font-weight: 600;
+}
+
+.n8n-tags {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.n8n-tags li {
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.85em;
+}
+
+.n8n-canvas summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.n8n-canvas summary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.n8n-holder {
+  margin-top: 0.75rem;
+  min-height: 12rem;
+  overflow-x: auto;
+}
+
+.n8n-holder n8n-demo {
+  display: block;
+  min-height: 24rem;
+}

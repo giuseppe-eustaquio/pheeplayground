@@ -1,0 +1,84 @@
+[
+  {
+    "title": "Email Summary Agent",
+    "summary": "Summarizes emails with an LLM and returns the result in a fixed, structured format.",
+    "source": "https://n8n.io/workflows/2722-email-summary-agent/",
+    "sourceLabel": "Email Summary Agent on n8n.io",
+    "changes": [
+      "Replaced the OpenAI node with a Basic LLM Chain node",
+      "Added a Structured Output Parser to control the output format"
+    ],
+    "tools": ["Basic LLM Chain", "Structured Output Parser"],
+    "file": "n8n/workflows/email-summary.json",
+    "repo": "https://github.com/giuseppe-eustaquio/n8n-projects/tree/main/email-summary"
+  },
+  {
+    "title": "Email Auto-Label",
+    "summary": "Uses AI nodes to label Gmail messages automatically.",
+    "source": "https://n8n.io/workflows/2197-auto-label-incoming-gmail-messages-with-ai-nodes/",
+    "sourceLabel": "Auto-label incoming Gmail messages on n8n.io",
+    "changes": [
+      "Used a manual trigger instead of polling",
+      "Modified the Gmail node to fetch multiple messages instead of one"
+    ],
+    "tools": ["Gmail", "AI nodes"],
+    "file": "n8n/workflows/email-auto-label.json",
+    "repo": "https://github.com/giuseppe-eustaquio/n8n-projects/tree/main/email-auto-label"
+  },
+  {
+    "title": "Email Auto-Draft",
+    "summary": "Writes a reply draft in Gmail for the latest email.",
+    "source": "https://github.com/enescingoz/awesome-n8n-templates/blob/main/Gmail_and_Email_Automation/Compose%20reply%20draft%20in%20Gmail%20with%20OpenAI%20Assistant.json",
+    "sourceLabel": "awesome-n8n-templates",
+    "changes": [
+      "Used a manual trigger instead of polling",
+      "Modified the Gmail node to fetch only the latest email",
+      "Replaced the OpenAI node with a Basic LLM Chain node",
+      "Updated the API URL"
+    ],
+    "tools": ["Gmail", "Basic LLM Chain"],
+    "file": "n8n/workflows/email-auto-draft.json",
+    "repo": "https://github.com/giuseppe-eustaquio/n8n-projects/tree/main/email-auto-draft"
+  },
+  {
+    "title": "Hourly Weather Email",
+    "summary": "Every hour, fetches current weather and emails a short summary written by an LLM.",
+    "source": null,
+    "changes": [],
+    "tools": ["Schedule Trigger", "OpenWeatherMap", "Basic LLM Chain", "Groq"],
+    "file": "n8n/workflows/email-send-weather.json",
+    "repo": "https://github.com/giuseppe-eustaquio/n8n-projects/tree/main/email-send-weather"
+  },
+  {
+    "title": "Simple Catch-All Error Workflow",
+    "summary": "Set as the Error Workflow on my other workflows, so any failure sends me an email.",
+    "source": "https://n8n.io/workflows/10755-simple-error-workflow/",
+    "sourceLabel": "Simple error workflow on n8n.io",
+    "changes": [
+      "Gave each error email a unique subject",
+      "Set it as the Error Workflow of my existing workflows"
+    ],
+    "tools": ["Error Trigger"],
+    "file": "n8n/workflows/simple-catch-all-error.json",
+    "repo": "https://github.com/giuseppe-eustaquio/n8n-projects/tree/main/simple-catch-all-error"
+  },
+  {
+    "title": "Sheet Weather Tracking",
+    "summary": "Monitors weather for multiple cities and logs it to a sheet.",
+    "source": "https://n8n.io/workflows/12653-monitor-multi-city-weather-with-openweathermap-gpt-4o-mini-and-discord/",
+    "sourceLabel": "Multi-city weather monitor on n8n.io",
+    "changes": ["Removed the Discord flow", "Replaced OpenAI with Grok"],
+    "tools": ["OpenWeatherMap", "Google Sheets", "Grok"],
+    "file": "n8n/workflows/sheet-weather-tracking.json",
+    "repo": "https://github.com/giuseppe-eustaquio/n8n-projects/tree/main/sheet-weather-tracking"
+  },
+  {
+    "title": "Zendesk Ticket Weather Analyzer",
+    "summary": "TODO: one sentence on what this does. It isn't described in the repo README yet.",
+    "source": null,
+    "changes": [],
+    "tools": ["Zendesk", "OpenWeatherMap"],
+    "file": "n8n/workflows/zendesk-ticket-weather-analyzer.json",
+    "repo": "https://github.com/giuseppe-eustaquio/n8n-projects/tree/main/zendesk-ticket-weather-analyzer"
+  }
+]

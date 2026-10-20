@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>n8n Workflows · Phee Playground</title>
+<meta name="description" content="Automation workflows built in n8n, with interactive previews." />
+<script>
+try {
+  var t = localStorage.getItem("theme");
+  if (t) document.documentElement.setAttribute("data-theme", t);
+  var a = localStorage.getItem("accent");
+  if (a) document.documentElement.setAttribute("data-accent", a);
+} catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600&display=swap"
+  rel="stylesheet"
+/>
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/n8n.css" />
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<button class="cornify-button" id="cornify-btn" type="button">
+  Cornify this page <span aria-hidden="true">✨</span>
+</button>
+<p class="cornify-status" id="cornify-status" role="status" aria-live="polite"></p>
+
+<header class="site-header">
+  <a class="brand" href="index.html">Phee Playground</a>
+  <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav">Menu</button>
+  <nav class="site-nav" id="site-nav" aria-label="Main">
+    <a href="internet-stuff.html">Internet Stuff</a>
+    <a href="playground.html">Playground</a>
+    <a href="n8n.html" aria-current="page">n8n</a>
+    <button class="theme-toggle" id="theme-toggle" type="button">Dark mode</button>
+    <div class="accent-picker">
+      <p class="accent-label" id="accent-label">Accent color</p>
+      <div class="swatches" role="group" aria-labelledby="accent-label">
+        <button class="swatch" data-accent="blue" aria-label="Blue" aria-pressed="true"></button>
+        <button class="swatch" data-accent="coral" aria-label="Coral" aria-pressed="false"></button>
+        <button class="swatch" data-accent="green" aria-label="Green" aria-pressed="false"></button>
+        <button class="swatch" data-accent="violet" aria-label="Violet" aria-pressed="false"></button>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <h1>n8n workflows</h1>
+    <p class="lede">
+      Automations I've built and adapted while learning n8n. Open any card to explore the
+      workflow canvas. Each one lists where it started and what I changed.
+    </p>
+    <p><a href="https://github.com/giuseppe-eustaquio/n8n-projects">All workflow files on GitHub</a></p>
+  </section>
+
+  <section class="section">
+    <div class="n8n-list" id="n8n-list" aria-live="polite">
+      <p>Loading workflows…</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>&copy; <span id="year">2026</span> Phee Playground</p>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+<script type="module" src="js/n8n.js"></script>
+</body>
+</html>
