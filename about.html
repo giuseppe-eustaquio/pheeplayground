@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About | Phee Playground</title>
+    <meta
+      name="description"
+      content="Meet Giuseppe, say hi to Phee, and find out what Phee Playground is all about."
+    />
+    <script>
+      try {
+        var t = localStorage.getItem("theme");
+        if (t) document.documentElement.setAttribute("data-theme", t);
+        var a = localStorage.getItem("accent");
+        if (a) document.documentElement.setAttribute("data-accent", a);
+      } catch (e) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <button class="cornify-button" id="cornify-btn" type="button">
+      Cornify this page <span aria-hidden="true">✨</span>
+    </button>
+    <p
+      class="cornify-status"
+      id="cornify-status"
+      role="status"
+      aria-live="polite"
+    ></p>
+
+    <header class="site-header">
+      <a class="brand" href="index.html">Phee Playground</a>
+      <button
+        class="nav-toggle"
+        id="nav-toggle"
+        aria-expanded="false"
+        aria-controls="site-nav"
+      >
+        Menu
+      </button>
+      <nav class="site-nav" id="site-nav" aria-label="Main">
+        <a href="internet-stuff.html">Internet Stuff</a>
+        <a href="n8n.html">n8n</a>
+        <a href="playground.html">Playground</a>
+        <a href="about.html" aria-current="page">About</a>
+        <button class="theme-toggle" id="theme-toggle" type="button">
+          Dark mode
+        </button>
+        <div class="accent-picker">
+          <p class="accent-label" id="accent-label">Accent color</p>
+          <div class="swatches" role="group" aria-labelledby="accent-label">
+            <button
+              class="swatch"
+              data-accent="blue"
+              aria-label="Blue"
+              aria-pressed="true"
+            ></button>
+            <button
+              class="swatch"
+              data-accent="coral"
+              aria-label="Coral"
+              aria-pressed="false"
+            ></button>
+            <button
+              class="swatch"
+              data-accent="green"
+              aria-label="Green"
+              aria-pressed="false"
+            ></button>
+            <button
+              class="swatch"
+              data-accent="violet"
+              aria-label="Violet"
+              aria-pressed="false"
+            ></button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero home-hero" id="top">
+        <figure class="home-photo">
+          <div class="dog-frame">
+            <img
+              id="about-phee-img"
+              alt="A random photo of Phee"
+              width="1200"
+              height="600"
+              hidden
+            />
+            <p class="dog-fallback" id="about-phee-fallback">
+              Loading a Phee photo…
+            </p>
+          </div>
+          <figcaption class="dog-source">A little hello from Phee.</figcaption>
+        </figure>
+        <p class="fact-kicker">A little about this place</p>
+        <h1>Greetings from Phee</h1>
+        <p class="lede">
+          Hi, I’m Giuseppe—and this is Phee, who’s here to say hello (and
+          occasionally steal the spotlight).
+        </p>
+      </section>
+
+      <section class="section" aria-labelledby="about-project-title">
+        <h2 id="about-project-title">So, what’s Phee Playground?</h2>
+        <p>
+          It’s my personal project and a bit of a portfolio: a place to try
+          ideas, learn by making, and collect things that are fun to click
+          around.
+        </p>
+        <p>
+          I built it with <strong>AI-assisted development</strong>—sometimes
+          called <em>vibe coding</em>. I bring the ideas and steer the project;
+          AI helps me turn them into working code. It’s been a fun way to
+          experiment, learn, and make something of my own.
+        </p>
+      </section>
+
+      <section class="section" aria-labelledby="explore-title">
+        <h2 id="explore-title">Take a look around</h2>
+        <div class="home-destinations">
+          <a class="destination-card" href="index.html">
+            <p class="fact-kicker">Start here</p>
+            <h3>Home</h3>
+            <p>
+              Your friendly starting point, with a fresh Phee photo to greet
+              you.
+            </p>
+            <span class="game-card-cta">Head home →</span>
+          </a>
+          <a class="destination-card" href="internet-stuff.html">
+            <p class="fact-kicker">Curiosities &amp; surprises</p>
+            <h3>Internet Stuff</h3>
+            <p>
+              A grab bag of internet-powered diversions: dog photos, useless
+              facts, advice, and jokes.
+            </p>
+            <span class="game-card-cta">Take a look →</span>
+          </a>
+          <a class="destination-card" href="playground.html">
+            <p class="fact-kicker">Play, learn, explore</p>
+            <h3>Playground</h3>
+            <p>
+              Games, tutorials, and activities—with a few twists and turns.
+            </p>
+            <span class="game-card-cta">Let’s play →</span>
+          </a>
+          <a class="destination-card" href="n8n.html">
+            <p class="fact-kicker">A peek behind the scenes</p>
+            <h3>n8n Workflows</h3>
+            <p>
+              Automations I’ve built and adapted while learning n8n, with
+              interactive previews.
+            </p>
+            <span class="game-card-cta">Explore workflows →</span>
+          </a>
+        </div>
+        <p>
+          It’s all a work in progress, so have a look around—and say hi to Phee
+          for me.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>&copy; <span id="year">2026</span> Phee Playground</p>
+    </footer>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

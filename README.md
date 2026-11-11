@@ -1,7 +1,7 @@
 # Phee Playground
 
-A plain HTML/CSS/JS site with three separate pages: a welcome page,
-Internet Stuff, and a Playground of games.
+A plain HTML/CSS/JS site with a welcome page, Internet Stuff, a Playground of
+games, n8n workflow demos, and an About page.
 
 ## Run it locally
 
@@ -29,6 +29,7 @@ them to the commit, so the deployed site always matches `images/phee/`.
 
 ```
 index.html              welcome page
+about.html              about Giuseppe and the project
 internet-stuff.html     API-powered curiosities
 playground.html         games and activities
 css/style.css           site styles

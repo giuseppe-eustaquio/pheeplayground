@@ -45,9 +45,11 @@ swatches.forEach((swatch) => {
 });
 if (swatches.length) setAccent(root.getAttribute("data-accent") || "blue");
 
-const homePheeImg = document.getElementById("home-phee-img");
-const homePheeFallback = document.getElementById("home-phee-fallback");
-if (homePheeImg && homePheeFallback) {
+function loadRandomPheeImage(imgId, fallbackId) {
+  const imageElement = document.getElementById(imgId);
+  const fallback = document.getElementById(fallbackId);
+  if (!imageElement || !fallback) return;
+
   getPheeImages()
     .then((images) => {
       if (!images.length) throw new Error("No Phee photos are listed in the manifest");
@@ -60,15 +62,18 @@ if (homePheeImg && homePheeFallback) {
       });
     })
     .then((image) => {
-      homePheeImg.src = image;
-      homePheeImg.hidden = false;
-      homePheeFallback.hidden = true;
+      imageElement.src = image;
+      imageElement.hidden = false;
+      fallback.hidden = true;
     })
     .catch((err) => {
-      console.error("Home Phee photo failed to load:", err);
-      homePheeFallback.textContent = "Couldn't load a Phee photo right now.";
+      console.error("Phee photo failed to load:", err);
+      fallback.textContent = "Couldn't load a Phee photo right now.";
     });
 }
+
+loadRandomPheeImage("home-phee-img", "home-phee-fallback");
+loadRandomPheeImage("about-phee-img", "about-phee-fallback");
 
 const cornifyBtn = document.getElementById("cornify-btn");
 const cornifyStatus = document.getElementById("cornify-status");
