@@ -30,6 +30,9 @@ function renderCard(item) {
   const card = el("article", "n8n-card");
   card.appendChild(el("h2", "", item.title));
   card.appendChild(el("p", "", item.summary));
+  if (item.descriptionNote) {
+    card.appendChild(el("p", "n8n-origin", item.descriptionNote));
+  }
 
   // Origin: honest about adapted vs. original work
   const origin = el("p", "n8n-origin");

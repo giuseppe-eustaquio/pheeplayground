@@ -14,7 +14,7 @@ const themeBtn = document.getElementById("theme-toggle");
 function currentTheme() {
   const set = root.getAttribute("data-theme");
   if (set) return set;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return "dark";
 }
 
 if (themeBtn) {

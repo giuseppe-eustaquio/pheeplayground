@@ -1,0 +1,264 @@
+.ng {
+  --ng-glow: color-mix(in srgb, var(--accent) 35%, transparent);
+  max-width: 46rem;
+  margin-inline: auto;
+}
+
+.ng-panel {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.25rem, 5vw, 2.5rem);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(ellipse at 50% 40%, var(--ng-glow), transparent 56%),
+    var(--surface);
+  box-shadow: 0 1.5rem 4rem color-mix(in srgb, #000 24%, transparent);
+}
+
+.ng-panel::before {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 5px,
+    color-mix(in srgb, var(--ink) 3%, transparent) 5px 6px
+  );
+  content: "";
+  pointer-events: none;
+}
+
+.ng-topline,
+.ng-footer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+
+.ng-eyebrow,
+.ng-round,
+.ng-footer {
+  margin: 0;
+  color: var(--muted);
+}
+
+.ng-eyebrow,
+.ng-footer {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ng-round {
+  font-size: 0.85rem;
+}
+
+.ng-round strong {
+  margin-left: 0.25rem;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ng-display {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  min-height: 12rem;
+  margin: 1.5rem 0;
+  padding: 1.6rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--bg) 84%, transparent);
+  box-shadow: inset 0 0 2.5rem color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.ng-display-label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+}
+
+.ng-number {
+  color: var(--accent);
+  font-family: var(--font-head);
+  font-size: clamp(3rem, 13vw, 6.5rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-shadow: 0 0 1.1rem var(--ng-glow);
+}
+
+.ng-display-spark {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--muted);
+  box-shadow: 0 0 0.8rem currentColor;
+}
+
+.ng-display-spark.is-revealed {
+  background: var(--accent);
+  animation: ng-pulse 0.65s ease-out 2;
+}
+
+.ng-odds {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 1.5rem;
+}
+
+.ng-odds p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.ng-odds-badge {
+  flex: none;
+  display: grid;
+  place-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line));
+  border-radius: 50%;
+  color: var(--accent);
+  font-family: var(--font-head);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 0.95;
+  text-align: center;
+  transform: rotate(-12deg);
+}
+
+.ng-form label {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-weight: 700;
+}
+
+.ng-hint {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.ng-controls {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.ng-controls input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.85rem;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.ng-controls input:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ng-submit {
+  flex: none;
+  padding: 0.65rem 1rem;
+}
+
+.ng-submit:disabled {
+  cursor: default;
+  opacity: 0.6;
+  transform: none;
+}
+
+.ng-result {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+}
+
+.ng-result[hidden] {
+  display: none;
+}
+
+.ng-verdict {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.ng-explanation {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.ng-footer {
+  margin-top: 1.4rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}
+
+.ng-again {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.ng-again:hover {
+  text-decoration: underline;
+}
+
+.ng-again[hidden] {
+  display: none;
+}
+
+@keyframes ng-pulse {
+  50% {
+    opacity: 0.45;
+    transform: scale(1.7);
+  }
+}
+
+@media (max-width: 32rem) {
+  .ng-controls {
+    flex-direction: column;
+  }
+
+  .ng-submit {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ng-display-spark.is-revealed {
+    animation: none;
+  }
+}

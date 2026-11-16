@@ -74,7 +74,8 @@
   },
   {
     "title": "Zendesk Ticket Weather Analyzer",
-    "summary": "TODO: one sentence on what this does. It isn't described in the repo README yet.",
+    "summary": "Adds an AI-generated internal note to Zendesk tickets, comparing the ticket details with current weather in Manila.",
+    "descriptionNote": "AI-generated description.",
     "source": null,
     "changes": [],
     "tools": ["Zendesk", "OpenWeatherMap"],

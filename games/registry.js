@@ -23,6 +23,13 @@ export const games = [
     load: () => import("./turbo-tetris/game.js"),
   },
   {
+    id: "number-guessing",
+    title: "Number Guessing Game",
+    blurb:
+      "Guess the secret number from 1 to 1,000,000 and see if luck is on your side.",
+    load: () => import("./number-guessing/game.js"),
+  },
+  {
     id: "one-player-chess",
     title: "One-Player Chess",
     blurb:
