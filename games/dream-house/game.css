@@ -1,0 +1,172 @@
+.dh {
+  --wall: #f4f6f5;
+  --floor: #d8d9d3;
+  --dark: #26313a;
+  --wood: #7d5a44;
+  --cream: #edf0ea;
+  --green: #4d7860;
+  --coral: #c96f52;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--wall);
+}
+.dh-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.dh-toolbar p { margin: 0; max-width: none; }
+.dh-reset { flex: 0 0 auto; padding: 0.45rem 0.8rem; }
+.dh-room {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 28rem;
+  overflow: hidden;
+  background:
+    linear-gradient(153deg, transparent 72%, rgba(255,255,255,.55) 72.2% 72.7%, transparent 73%) 0 0 / 50% 100%,
+    linear-gradient(180deg, #edf1f1 0 31%, #fbfcfb 31% 57%, var(--floor) 57%);
+  perspective: 900px;
+}
+.dh-room::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 43%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 11.9%, rgba(255,255,255,.58) 12%, transparent 12.2%),
+    repeating-linear-gradient(0deg, transparent 0 24%, rgba(125,125,115,.12) 24.3%, transparent 25%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  pointer-events: none;
+}
+.dh-ceiling-window {
+  position: absolute;
+  z-index: 1;
+  left: 53%; top: -9%;
+  width: 28%; height: 29%;
+  background: #dbeaf0;
+  clip-path: polygon(0 0,100% 0,76% 100%,18% 100%);
+  box-shadow: inset 0 0 30px #fff;
+}
+.dh-ceiling-window i {
+  position: absolute; width: 1.5%; height: 100%; background: #eef2f2;
+  transform: rotate(-25deg); top: 0;
+}
+.dh-ceiling-window i:nth-child(1){left:20%}.dh-ceiling-window i:nth-child(2){left:44%}
+.dh-ceiling-window i:nth-child(3){left:68%}.dh-ceiling-window i:nth-child(4){left:88%}
+.dh-upper { position:absolute; inset:0; z-index:2; }
+.dh-back-wall {
+  position:absolute; left:0; bottom:36%; width:48%; height:35%; z-index:3;
+  background:#eef0ed;
+  clip-path: polygon(0 35%,100% 58%,100% 100%,0 100%);
+}
+.dh-balcony {
+  position:absolute; left:0; top:25%; width:39%; height:31%;
+  border-top: 1.2rem solid #edf0ed;
+  border-right: 2.5rem solid #edf0ed;
+  z-index:4;
+}
+.dh-rail { position:absolute; left:0; bottom:0; height:48%; width:78%; border:2px solid var(--dark); border-left:0; }
+.rail-a { transform:skewY(12deg); }.rail-b { left:18%; bottom:-20%; }.rail-c { left:37%; bottom:-30%; }
+.dh-stairs {
+  position:absolute; right:-9%; top:-67%; width:62%; height:72%;
+  background:repeating-linear-gradient(165deg,#777 0 2.5%,#282d31 2.5% 5.2%,#111 5.2% 7%);
+  clip-path:polygon(0 100%,100% 100%,100% 0);
+  transform:skewY(-6deg);
+}
+.dh-item { position:absolute; border:0; padding:0; background:none; cursor:pointer; color:inherit; z-index:8; transition:filter .15s, transform .15s; }
+.dh-item:hover, .dh-item.is-selected { filter:drop-shadow(0 0 .45rem rgba(47,111,237,.65)); }
+.dh-item.is-selected { transform:translateY(-3px); }
+.dh-window {
+  right:-51%; bottom:-2%; width:42%; height:58%;
+  background:linear-gradient(135deg,#c8dfe5,#eff7f7);
+  border:6px solid #2b3235;
+  transform:skewY(9deg);
+}
+.pane { position:absolute; top:0; bottom:0; width:50%; border-right:4px solid #2b3235; }
+.pane-right{right:0;border-right:0}
+.dh-shelf {
+  left:68%; bottom:-74%; width:19%; height:54%;
+  background:#e7e1d5; border:5px solid #5a4a3f;
+  transform:skewY(8deg);
+}
+.shelf-top { position:absolute; left:-8%; right:-8%; top:-8%; height:8%; background:#6b5546; }
+.book { position:absolute; bottom:53%; width:9%; height:31%; background:#6b7f92; }
+.book.b1{left:8%}.book.b2{left:20%;height:24%;background:#c66e59}.book.b3{left:31%;background:#7d9d72}
+.book.b4{left:42%;height:27%;background:#d1b977}.book.b5{left:53%;height:34%;background:#3d5963}
+.shelf-object { position:absolute; right:12%; top:25%; font-size:1.2rem; color:#7d5a44; }
+.dh-art {
+  left:72%; bottom:68%; width:11%; height:23%;
+  border:5px solid #ece8de; box-shadow:0 2px 8px rgba(0,0,0,.16);
+  overflow:hidden;
+}
+.dh-art img { width:100%; height:100%; object-fit:cover; }
+.dh-dogbed { left:19%; bottom:7%; width:19%; height:16%; z-index:11; }
+.dh-bed {
+  position:absolute; left:0; bottom:0; width:100%; height:58%;
+  border-radius:60% 60% 45% 45%; background:#b9c3be;
+  box-shadow:0 .6rem .4rem rgba(55,55,45,.16), inset 0 -.35rem rgba(0,0,0,.08);
+  transform:skewX(-8deg);
+}
+.dh-dog {
+  position:absolute; z-index:2; left:34%; bottom:30%; width:38%; aspect-ratio:1.25;
+  border-radius:50%; background:#efe8dc; overflow:hidden;
+  box-shadow:0 .3rem .5rem rgba(0,0,0,.12);
+}
+.dh-dog img { width:100%; height:100%; object-fit:cover; }
+.dh-chess { left:50%; bottom:17%; width:19%; height:21%; z-index:12; }
+.dh-tabletop { position:absolute; left:0; top:38%; width:100%; height:12%; border-radius:50%; background:#6e503e; }
+.dh-table-leg { position:absolute; top:48%; width:7%; height:45%; background:#604936; }
+.dh-table-leg.left{left:20%;transform:rotate(8deg)}.dh-table-leg.right{right:20%;transform:rotate(-8deg)}
+.dh-board {
+  position:absolute; left:18%; top:25%; width:64%; height:27%;
+  display:grid; grid-template-columns:repeat(8,1fr); transform:skewX(-14deg);
+  border:2px solid #5d4a3c;
+}
+.dh-board i { background:#ede7d8 }.dh-board i:nth-child(even),.dh-board i:nth-child(16n+1),
+.dh-board i:nth-child(16n+3),.dh-board i:nth-child(16n+5),.dh-board i:nth-child(16n+7),
+.dh-board i:nth-child(16n+10),.dh-board i:nth-child(16n+12),.dh-board i:nth-child(16n+14),.dh-board i:nth-child(16n+16) { background:#59634f }
+.chess-piece { position:absolute; top:12%; z-index:2; font-size:1.5rem; line-height:1; color:#f7f3e8; text-shadow:0 1px #333; }
+.chess-piece.king{left:62%}.chess-piece.rook{left:28%;color:#303a35}
+.dh-desk { right:3%; bottom:25%; width:23%; height:31%; z-index:9; }
+.monitor {
+  position:absolute; left:28%; top:7%; width:49%; height:37%;
+  border:6px solid #252d31; background:#d5edf2; transform:skewX(-3deg);
+  display:grid; place-items:center;
+}
+.monitor i { font-style:normal; color:#587b82; font-weight:800; font-size:.9rem; }
+.desk-top { position:absolute; left:5%; top:47%; width:94%; height:8%; background:var(--wood); transform:skewX(-8deg); }
+.desk-leg { position:absolute; top:54%; width:6%; height:43%; background:#604936; }
+.leg-left{left:14%}.leg-right{right:12%}
+.chair { position:absolute; left:33%; top:54%; width:34%; height:28%; border-radius:40%; background:#3e5353; }
+.chair::after { content:""; position:absolute; left:20%; bottom:-35%; width:60%; height:45%; background:#3e5353; border-radius:5px; }
+.desk-paw { position:absolute; left:73%; top:37%; font-size:.8rem; color:#777; }
+.dh-sofa { left:8%; bottom:19%; width:31%; height:22%; z-index:10; }
+.sofa-back { position:absolute; left:5%; top:0; width:90%; height:55%; border-radius:12% 12% 5% 5%; background:#778f86; }
+.sofa-seat { position:absolute; left:0; top:48%; width:100%; height:38%; border-radius:8%; background:#879c92; }
+.sofa-arm { position:absolute; top:32%; width:13%; height:55%; background:#6d857b; border-radius:15%; }
+.arm-left{left:0}.arm-right{right:0}.cushion { position:absolute; top:16%; width:18%; height:34%; border-radius:12%; background:#d5aa83; transform:rotate(-5deg); }
+.cushion.c1{left:18%}.cushion.c2{left:40%;background:#c56d55;transform:rotate(5deg)}
+.dh-plant { width:9%; height:22%; z-index:11; }
+.plant-left{left:1%;bottom:26%}.plant-right{right:1%;bottom:7%}
+.plant-pot { position:absolute; left:25%; bottom:0; width:50%; height:32%; background:#b16f50; border-radius:10% 10% 30% 30%; }
+.leaf { position:absolute; left:43%; bottom:28%; width:17%; height:55%; border-radius:80% 0 80% 0; background:var(--green); transform-origin:bottom; }
+.leaf.l1{transform:rotate(-55deg)}.leaf.l2{transform:rotate(-25deg);height:62%}.leaf.l3{transform:rotate(25deg);height:68%}.leaf.l4{transform:rotate(55deg)}
+.dh-note {
+  position:absolute; z-index:20; left:50%; bottom:2%; transform:translateX(-50%);
+  max-width:none; margin:0; padding:.35rem .65rem;
+  border-radius:99px; background:rgba(255,255,255,.88); color:var(--ink);
+  font-size:.78rem; box-shadow:0 2px 12px rgba(0,0,0,.12);
+  pointer-events:none;
+}
+@media (max-width: 700px) {
+  .dh-room { aspect-ratio:4/3; min-height:24rem; }
+  .dh-toolbar span { display:none; }
+  .dh-desk { width:26%; }
+  .dh-chess { width:22%; }
+}

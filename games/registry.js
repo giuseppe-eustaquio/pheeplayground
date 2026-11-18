@@ -9,6 +9,13 @@
 // Phaser) only downloads its code when someone actually opens it.
 export const games = [
   {
+    id: "dream-house",
+    title: "Dream House",
+    blurb:
+      "A light-filled home furnished around Phee, chess, coding, and the games you love.",
+    load: () => import("./dream-house/game.js"),
+  },
+  {
     id: "matching-pairs",
     title: "Matching Pairs",
     blurb:
